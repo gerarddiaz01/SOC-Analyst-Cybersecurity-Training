@@ -30,3 +30,11 @@ Ce repository est organisé par domaine de compétence :
 ├── 📁 Malware-Analysis/        # Rapports d'analyse statique/dynamique (Sandboxing)
 ├── 📁 Infrastructure-Labs/     # Setups (Docker-compose, Vagrant) de mes labs
 └── 📁 Write-Ups/               # Articles techniques et résolutions de CTF/Challenges
+```
+
+📫 Contact & Réseaux
+Je suis ouvert aux opportunités en tant qu'Analyste SOC / Blue Team.
+
+💼 LinkedIn : [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/gerard-diaz-gibert)
+
+📧 Email : [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge\&logo=gmail\&logoColor=white)](mailto:gerarddiazgibert@gmail.com)
