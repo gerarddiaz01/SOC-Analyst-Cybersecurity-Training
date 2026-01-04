@@ -12,25 +12,9 @@ L'infrastructure est entièrement virtualisée sous **Oracle VirtualBox**, avec 
 
 Le réseau est isolé de l'hôte physique grâce à une segmentation stricte via un commutateur virtuel (Internal Network). Seul le pare-feu pfSense possède une interface pointée vers l'extérieur (WAN) pour l'accès Internet.
 
-### 🗺️ Schéma Logique (Mermaid)
+### 🗺️ Schéma Logique
 
-```mermaid
-graph TD
-    Internet((Internet)) -->|NAT / Bridge| WAN_Interface
-    subgraph "Hyperviseur (VirtualBox)"
-        WAN_Interface[Interface WAN pfSense]
-        
-        subgraph "Zone DMZ / LAN Sécurisé (192.168.50.0/24)"
-            pfSense[🔥 pfSense Firewall<br/>GW: 192.168.50.1]
-            
-            pfSense -->|Switch Virtuel: pfsense_lan| VSwitch
-            
-            VSwitch -->|192.168.50.101| Kali[⚔️ Kali Linux<br/>Attaquant]
-            VSwitch -->|192.168.50.102| Ubuntu[🎯 Ubuntu Desktop<br/>Victime/Client]
-            VSwitch -->|192.168.50.100| Win11[🖥️ Windows 11<br/>Victime/AD]
-        end
-    end
-```
+![Topologie Réseau du Lab SOC](network-topology.png)
 
 ### 🌐 Plages d'Adresses IP (CIDR)
 
