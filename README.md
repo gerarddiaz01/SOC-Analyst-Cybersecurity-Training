@@ -40,7 +40,7 @@ Ce repository est organisé par domaine de compétence :
 └── 📁 Write-Ups/             # Articles/Cheat-sheets techniques et résolutions de challenges TryHackMe
 ```
 
-📫 Contact & Réseaux
+## 📫 Contact & Réseaux
 Je suis ouvert aux opportunités en tant qu'Analyste SOC / Blue Team.
 
 💼 LinkedIn : [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/gerard-diaz-gibert)
