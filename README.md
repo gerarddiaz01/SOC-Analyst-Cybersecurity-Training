@@ -32,13 +32,13 @@ Ce repository est organisé par domaine de compétence :
 
 ```text
 /
+├── 📁 Projects-Simulations/  # Projets de formation et simulations pratiques (Mise en situation)
 ├── 📁 Linux-Basics/          # Administration système, scripting Bash, gestion des droits et logs auth
-├── 📁 Windows-Hardening/     # Audit policies, Event Viewer, réduction de la surface d'attaque et sécurisation d'endpoints
-├── 📁 Networking/            # Analyse de protocoles, Analyse de trafic via netstat, tcpdump, captures PCAP et Wireshark
+├── 📁 Windows-Hardening/     # Stratégies d'audit, Event Viewer et sécurisation d'endpoints
+├── 📁 Networking/            # Analyse de protocoles et de trafic (Netstat, Tcpdump, Wireshark, PCAP)
 ├── 📁 Infrastructure-Labs/   # Documentation de l'installation du lab (VirtualBox, ISOs)
-└── 📁 Write-Ups/             # Articles techniques et résolutions de challenges TryHackMe
+└── 📁 Write-Ups/             # Articles/Cheat-sheets techniques et résolutions de challenges TryHackMe
 ```
-
 
 📫 Contact & Réseaux
 Je suis ouvert aux opportunités en tant qu'Analyste SOC / Blue Team.
