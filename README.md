@@ -4,7 +4,7 @@
 ![Focus](https://img.shields.io/badge/Focus-Blue_Team_%26_Detection-0052cc?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-Bienvenue sur mon portfolio technique. Ce dépôt documente mon parcours d'apprentissage en **Analyste SOC Cybersécurité**. Il regroupe mes projets d'automatisation, mes règles de détection, mes analyses de menaces et les configurations de mes environnements de laboratoire (Home Labs).
+Bienvenue sur mon portfolio technique. Ce dépôt documente mon parcours d'apprentissage en **Analyste SOC Cybersécurité**. Il regroupe mes projets, mes outils d'automatisation, mes règles de détection, mes analyses de menaces et les configurations de mes environnements de laboratoire (Home Labs).
 
 > ⚠️ **Disclaimer :** Tous les scripts, techniques et informations présentés ici sont destinés à un usage **pédagogique et défensif** uniquement, dans des environnements contrôlés.
 
