@@ -4,7 +4,15 @@
 ![Focus](https://img.shields.io/badge/Focus-Blue_Team_%26_Detection-0052cc?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-Bienvenue sur mon portfolio technique. Ce dépôt documente mon parcours d'apprentissage en **Analyste SOC Cybersécurité**. Il regroupe mes projets, mes outils d'automatisation, mes règles de détection, mes analyses de menaces et les configurations de mes environnements de laboratoire (Home Labs).
+Bienvenue dans mon répertoire d'apprentissage dédié à la cybersécurité. Ce dépôt centralise ma progression technique alors que je me prépare à devenir SOC Analyst (objectif : 10-12 mois). Il documente mes projets, mes laboratoires pratiques, mes analyses, et les configurations de mes environnements de laboratoire (Home Labs) et le durcissement de systèmes.
+
+🚀 Objectifs de ce dépôt:
+
+- Documenter l'installation et la configuration de mon Home Lab (VirtualBox).
+
+- Prouver mes compétences techniques via des write-ups détaillés.
+
+- Créer une base de connaissances (Cheat Sheets) pour les opérations quotidiennes en SOC.
 
 > ⚠️ **Disclaimer :** Tous les scripts, techniques et informations présentés ici sont destinés à un usage **pédagogique et défensif** uniquement, dans des environnements contrôlés.
 
@@ -14,23 +22,23 @@ Voici les technologies et outils que j'utilise activement dans ce cursus :
 
 | Domaine | Outils & Langages |
 | :--- | :--- |
-| **SIEM & Logs** | ![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat-square&logo=splunk&logoColor=white) ![Elastic](https://img.shields.io/badge/Elastic_Stack-005571?style=flat-square&logo=elastic&logoColor=white) Microsoft Sentinel |
+| **SIEM & Logs** | ![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat-square&logo=splunk&logoColor=white) ![Elastic](https://img.shields.io/badge/Elastic_Stack-005571?style=flat-square&logo=elastic&logoColor=white) |
 | **Scripting & Auto** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white) PowerShell |
-| **Detection as Code** | SIGMA, YARA, Snort/Suricata, KQL (Kusto Query Language) |
-| **Infrastructure** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) VirtualBox, Wireshark, Sysmon |
+| **Infrastructure** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) VirtualBox, Wireshark |
 
-## 📂 Structure du Dépôt
+## 📂 Structure du Répertoire
 
 Ce repository est organisé par domaine de compétence :
 
 ```text
 /
-├── 📁 Scripting-Automation/    # Scripts Python/Bash pour l'analyse et l'automatisation
-├── 📁 Detection-Engineering/   # Règles SIGMA, YARA et requêtes SIEM (Splunk/Sentinel)
-├── 📁 Malware-Analysis/        # Rapports d'analyse statique/dynamique (Sandboxing)
-├── 📁 Infrastructure-Labs/     # Setups (Docker-compose, Vagrant) de mes labs
-└── 📁 Write-Ups/               # Articles techniques et résolutions de CTF/Challenges
+├── 📁 Linux-Basics/          # Administration système, scripting Bash, gestion des droits et logs auth
+├── 📁 Windows-Hardening/     # Audit policies, Event Viewer, réduction de la surface d'attaque et sécurisation d'endpoints
+├── 📁 Networking/            # Analyse de protocoles, Analyse de trafic via netstat, tcpdump, captures PCAP et Wireshark
+├── 📁 Infrastructure-Labs/   # Documentation de l'installation du lab (VirtualBox, ISOs)
+└── 📁 Write-Ups/             # Articles techniques et résolutions de challenges TryHackMe
 ```
+
 
 📫 Contact & Réseaux
 Je suis ouvert aux opportunités en tant qu'Analyste SOC / Blue Team.
