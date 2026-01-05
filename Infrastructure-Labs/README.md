@@ -37,7 +37,12 @@ Voici la liste des machines virtuelles déployées dans le laboratoire à ce jou
 
 ---
 
-## 3. Détails de Configuration Hyperviseur
+## 3. Détails de Configuration Hyperviseur & Documentation Technique
+
+Pour éviter de surcharger ce document, les configurations détaillées des composants critiques sont documentées séparément :
+
+* **[Configuration pfSense (Firewall & Règles)](PfSense-Configuration.md)**
+* **[Configuration Windows Server 2019 (IP Statique & Pare-feu)](Windows-Server-Configuration.md)**
 
 ### 🔌 Réseau Interne ("Internal Network")
 
