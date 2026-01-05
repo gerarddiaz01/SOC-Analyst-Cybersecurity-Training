@@ -14,7 +14,7 @@ Le réseau est isolé de l'hôte physique grâce à une segmentation stricte via
 
 ### 🗺️ Schéma Logique
 
-![Topologie Réseau du Lab SOC](network-topology.png)
+![Topologie Réseau du Lab SOC](Network-Topology.png)
 
 ### 🌐 Plages d'Adresses IP (CIDR)
 
@@ -30,6 +30,7 @@ Voici la liste des machines virtuelles déployées dans le laboratoire à ce jou
 | Machine | Rôle | OS | IP (LAN) | Ressources (vCPU/RAM) | Interfaces |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **pfSense** | Gateway, Firewall, DHCP, DNS | FreeBSD | `192.168.50.1` | 1 vCPU / 1 GB | **WAN:** Pont (Bridge)<br>**LAN:** Interne (`pfsense_lan`) |
+| **Windows Server** | Contrôleur de Domaine (AD) | Server 2019 | `192.168.50.10` | 2 vCPU / 4 GB | **Eth0:** Interne |
 | **Kali Linux** | Attaquant, Scan, Audit | Kali Rolling (Debian) | `192.168.50.101` | 2 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
 | **Ubuntu Desktop** | Machine Cible, Serveur Web/SSH | Ubuntu 24.04 LTS | `192.168.50.102` | 2 vCPU / 4 GB | **Enp0s3:** Interne (`pfsense_lan`) |
 | **Windows 11** | Machine Cible, Endpoint Utilisateur | Windows 11 Pro | `192.168.50.100` | 2 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
@@ -106,3 +107,14 @@ Ce laboratoire a été conçu pour répondre à trois objectifs pédagogiques :
 * [ ] **Active Directory :** Promouvoir la machine Windows en Contrôleur de Domaine pour simuler un environnement d'entreprise.
 * [ ] **Monitoring :** Installer **Sysmon** sur les endpoints Windows et rediriger les logs vers un SIEM (Splunk ou ELK Stack).
 * [ ] **IDS/IPS :** Activer Snort ou Suricata sur pfSense pour la détection d'intrusions réseau.
+
+---
+
+## 🏁 Conclusion & Perspectives
+
+Ce laboratoire constitue désormais une infrastructure de sécurité complète et autonome ("Sandbox"). Il reproduit fidèlement un réseau d'entreprise segmenté, permettant de simuler l'intégralité de la chaîne d'attaque (Kill Chain) et de défense :
+1.  **Reconnaissance & Exploitation** depuis Kali Linux.
+2.  **Persistance & Mouvements Latéraux** vers le Contrôleur de Domaine (Windows Server).
+3.  **Détection & Réponse** via l'analyse des logs et du trafic réseau.
+
+L'infrastructure est prête pour l'intégration future d'un SIEM (Splunk/ELK) et le déploiement de sondes EDR.
