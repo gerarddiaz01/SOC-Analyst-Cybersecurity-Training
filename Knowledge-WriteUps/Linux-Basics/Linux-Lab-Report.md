@@ -2,47 +2,104 @@
 
 Exercices réalisés sur mon environnement virtuel (Ubuntu/Kali) pour valider les compétences SOC.
 
-### 🎯 Mission 1 : Navigation, Flags & Opérateurs Logiques
-* **Concepts :** `ls -la`, `&&`, Création de dossiers.
-* **Objectif :** Maîtriser les options de commande et l'automatisation simple.
-* **Actions :**
-    1.  Utiliser la commande `ls -la` pour repérer les fichiers cachés (commençant par `.`) dans le dossier home.
-    2.  Créer un dossier `Enquete` **ET** entrer dedans en une seule ligne de commande grâce à l'opérateur `&&` (ex: `mkdir Enquete && cd Enquete`).
-    3.  Vérifier la position actuelle avec `pwd`.
+ ### ✅ Mission 1 : Navigation, Flags & Opérateurs Logiques (Validée)
+* **Objectif :** Maîtriser l'automatisation simple et la visibilité.
+* **Commandes exécutées :**
+    1.  `ls -la` (Liste tout, y compris les fichiers cachés `.`).
+    2.  `mkdir Enquete_Urgent && cd Enquete_Urgent` (Création et déplacement en une fois).
+    3.  `pwd` (Validation du chemin absolu).
+* **Résultat obtenu :** Le terminal affiche le contenu complet du dossier home, puis confirme le déplacement immédiat dans `/home/admin/Enquete_Urgent`.
 
-### 🎯 Mission 2 : Manipulation de Texte & Redirections
-* **Concepts :** `echo`, `nano`, `>`, `>>`, `cat`.
+### ✅ Mission 2 : Manipulation de Texte & Redirections (Validée)
 * **Objectif :** Créer et modifier des rapports d'incident sans interface graphique.
-* **Actions :**
-    1.  Utiliser `echo` pour écrire "Début de l'incident" dans un fichier `rapport.txt` (Opérateur `>` pour écraser/créer).
-    2.  Utiliser `echo` pour **ajouter** "Preuve 1 collectée" à la suite du fichier sans l'écraser (Opérateur `>>`).
-    3.  Ouvrir ce fichier avec `nano`, ajouter une ligne manuellement "Analyse terminée", et sauvegarder (`Ctrl+X`, `Y` pour Nano).
-    4.  Afficher le résultat final avec `cat` pour vérifier l'intégrité.
+* **Commandes exécutées :**
+    1.  `echo "Début de l'incident" > journal.txt` (Création du fichier avec contenu initial).
+    2.  `echo "Preuve 1 collectée" >> journal.txt` (Ajout à la suite sans écraser).
+    3.  `nano journal.txt` (Édition manuelle pour ajouter la ligne de conclusion).
+    4.  `cat journal.txt` (Affichage final pour validation).
+* **Preuve de réussite :**
+    ![Preuve Mission 2](../images/linux-mission2-proof.png)
+    *(Le fichier contient bien les 3 lignes chronologiques).*
 
-### 🎯 Mission 3 : Utilisateurs, Dossiers Système & Permissions
-* **Concepts :** `su`, `/tmp` vs `/etc`, `chmod`, `chown`.
-* **Objectif :** Comprendre les privilèges et les zones inscriptibles.
-* **Actions :**
-    1.  Tenter de créer un fichier dans `/etc` (ex: `touch /etc/test_hack`).  L'action doit échouer (**Permission Denied**) car c'est un dossier système protégé.
-    2.  Aller dans `/tmp` (dossier temporaire inscriptible par tous) et créer un fichier `malware_sample.txt`.
-    3.  Changer d'utilisateur avec `su` (ou `sudo su` pour passer root).
-    4.  Changer le propriétaire du fichier avec `chown` (ex: `chown root:root malware_sample.txt`) et vérifier avec `ls -l` que l'utilisateur standard ne peut plus le modifier.
+### ✅ Mission 3 : Gestion des Droits, Isolation & Chmod (Validée)
+* **Objectif :** Simuler un scénario multi-utilisateurs pour comprendre les risques de lecture ("World Readable") et sécuriser un fichier sensible.
+* **Commandes exécutées :**
 
-### 🎯 Mission 4 : Processus & Background
-* **Concepts :** `&` (Background), `ps`, `kill`.
-* **Objectif :** Gérer des tâches de fond (ex: un dump réseau long) sans bloquer le terminal.
-* **Actions :**
-    1.  Lancer une commande longue en arrière-plan avec l'opérateur `&` (ex: `sleep 500 &`).
-    2.  Vérifier qu'elle tourne avec `ps aux` et noter son **PID** (Process ID).
-    3.  Arrêter le processus avec `kill [PID]`.
+    1.  **Préparation :** Création d'un utilisateur tiers (`sudo adduser user1`) pour servir de "témoin".
 
-### 🎯 Mission 5 : Réseau & Transfert (Data Exfiltration Simulation)
-* **Concepts :** `python3 http.server`, `wget`, `ssh`, `scp`.
-* **Objectif :** Simuler l'exfiltration de données ou le téléchargement d'outils entre deux machines.
-* **Actions :**
-    1.  **Serveur (Machine A) :** Lancer un serveur web Python instantané sur le port 8000 (`python3 -m http.server 8000`).
-    2.  **Client (Machine B) :** Télécharger un fichier depuis la Machine A avec `wget http://[IP_A]:8000/fichier`.
-    3.  **Transfert Sécurisé :** Copier un fichier sensible de A vers B via SSH avec `scp` (ex: `scp secret.txt user@IP_B:/tmp/`).
+    2.  **Test Système & Création :**
+        * Tentative de création dans `/etc` -> **Échec** (Protection système).
+        * Création de `test_partage.txt` dans `/tmp` -> **Succès**.
+        ![Test Système](../images/linux-mission3-proof1.png)
+
+    3.  **Test de Vulnérabilité (User1) :**
+        * Connexion avec `su - user1`.
+        * Tentative de suppression -> **Échec** (Sticky bit sur /tmp).
+        * Tentative de lecture -> **Succès** (Par défaut, les fichiers sont lisibles par tous).
+        * Tentative d'écriture -> **Échec** (Pas de permissions).
+        ![Test User1](../images/linux-mission3-proof2.png)
+
+    4.  **Durcissement (Admin) :**
+        * Ajout de contenu sensible ("Hello").
+        * Application du **Moindre Privilège** : `chmod 600 test_partage.txt` (Lecture/Écriture pour le propriétaire uniquement).
+        * Vérification avec `ls -l` : Les droits sont passés de `-rw-rw-r--` à `-rw-------`.
+        ![Hardening](../images/linux-mission3-proof3.png)
+
+    5.  **Verrouillage Final avec chown (Admin) :**
+        * Transfert à Root : `sudo chown root:root test_partage.txt`.
+        * Test d'accès admin : `cat test_partage.txt` -> **Permission Denied** (Même l'admin est bloqué !).
+        * C'est la protection maximale.
+        * Avec sudo ça marche (sudo = root).
+        ![Chown Root](../images/linux-mission3-proof5.png)
+
+    6.  **Validation Finale (User1) :**
+        * Nouvelle tentative de lecture par `user1`.
+        * Résultat : **Permission denied**. Le fichier est évidemment inaccessible par user1.
+        ![Access Denied](../images/linux-mission3-proof4.png)
+
+### ✅ Mission 4 : Processus & Background (Validée)
+* **Objectif :** Gérer des tâches de fond et neutraliser un processus par son PID.
+* **Commandes exécutées :**
+    1.  `sleep 500 &` (Lancement en background pour ne pas bloquer le shell).
+    2.  `ps aux | grep sleep` (Recherche du PID spécifique dans la liste des processus).
+    3.  `kill 4064` (Arrêt forcé du processus via son PID).
+    4.  `ps -p 4064` (Confirmation que le processus n'existe plus).
+* **Preuve de réussite :**
+    ![Process Kill](../images/linux-mission4-proof1.png)
+
+### ✅ Mission 5 : Grep & Logs (Validée)
+* **Objectif :** Extraire de l'information critique dans un fichier de log système (Compétence SOC n°1).
+* **Commandes exécutées :**
+    1.  **Extraction (Bypass Permission) :** `sudo cat /var/log/auth.log > ~/auth-test.log` (Copie du log système protégé vers le dossier utilisateur pour analyse).
+    2.  **Comptage (Analysis) :** `cat auth-test.log | grep -a "auth" | wc -l` (Le pipe `|` envoie le résultat de grep vers `wc` qui compte les lignes).
+    3.  **Rapport (Reporting) :** `cat auth-test.log | grep -a "auth" > incident_report.txt` (Redirection des lignes suspectes vers un fichier de preuve).
+    4.  **Vérification :** `cat incident_report.txt`.
+* **Preuve de réussite :**
+    ![Log Extraction](../images/linux-mission5-proof1.png)
+    *(On voit bien le refus d'accès initial, puis la réussite de la copie et du grep).*
+    
+    ![Report Verification](../images/linux-mission5-proof2.png)
+    *(Le rapport contient bien les logs filtrés).*
+
+### ✅ Mission 6 : Réseau, Exfiltration & Troubleshooting SSH (Validée)
+* **Objectif :** Simuler l'exfiltration de données (HTTP) et l'administration sécurisée (SCP) entre deux machines (Kali <-> Ubuntu).
+* **Commandes exécutées :**
+    
+    1.  **Exfiltration de Données (Ubuntu -> Kali) :**
+        * Sur Ubuntu : Exposition du dossier via `python3 -m http.server 8000`.
+        * Sur Kali : Récupération via `wget http://[IP_Ubuntu]:8000/passwords.dump`.
+        * *Risque démontré :* Transfert en clair, sans authentification.
+        ![Exfiltration Python](../images/linux-mission6-proof1.png)
+
+    2.  **Configuration Système (Troubleshooting) :**
+        * Le transfert SCP a initialement échoué car le service SSH était éteint.
+        * **Remédiation :** `sudo systemctl start ssh` puis `enable ssh` pour la persistance.
+        ![SSH Config](../images/linux-mission6-proof3.png)
+
+    3.  **Transfert Sécurisé (Kali -> Ubuntu) :**
+        * Création du script `patch_security.sh`.
+        * Envoi sécurisé vers le dossier temporaire de la victime : `scp patch_security.sh admin@192.168.50.102:/tmp/`.
+        ![Secure Copy](../images/linux-mission6-proof2.png)
 
 ---
 *Dernière mise à jour : Janvier 2026*
