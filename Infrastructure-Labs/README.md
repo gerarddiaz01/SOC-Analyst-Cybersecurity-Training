@@ -95,6 +95,17 @@ Test de détection d'OS et de services. Par défaut, la cible Ubuntu n'exposait 
   * **Port 22/TCP : Open** (Service OpenSSH détecté et version identifiée).
   * **Détection OS :** Linux Kernel identifié avec précision grâce à l'analyse des paquets sur le port ouvert.
 
+### ✅ Test 5 : Authentification Active Directory (AD DS)
+
+Ce test valide la bonne intégration du poste client au domaine et le fonctionnement du protocole Kerberos.
+
+* **Action :** Tentative de connexion sur Windows 11 avec un compte utilisateur créé sur le serveur (n'existant pas localement sur le PC).
+* **Compte test :** `IRONCORP\alice`
+* **Résultat :**
+  * Ouverture de session réussie ("Bienvenue").
+  * Application des stratégies de groupe (GPO) par défaut.
+  * Commande `whoami` confirme l'identité : `ironcorp\alice`.
+
 ---
 
 ## 5. Objectifs du Lab

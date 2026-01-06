@@ -37,7 +37,7 @@ Ce repository est organisé par domaine de compétence :
 ├── 📁 Windows-Hardening/     # Stratégies d'audit, Event Viewer et sécurisation d'endpoints
 ├── 📁 Networking/            # Analyse de protocoles et de trafic (Netstat, Tcpdump, Wireshark, PCAP)
 ├── 📁 Infrastructure-Labs/   # Documentation de l'installation du lab (VirtualBox, ISOs)
-└── 📁 Write-Ups/             # Articles/Cheat-sheets techniques et résolutions de challenges TryHackMe
+└── 📁 Knowledge-Write-Ups/             # Articles/Cheat-sheets techniques et résolutions de challenges TryHackMe
 ```
 
 ## 📫 Contact & Réseaux

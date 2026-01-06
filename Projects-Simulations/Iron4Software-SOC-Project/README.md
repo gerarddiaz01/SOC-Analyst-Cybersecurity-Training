@@ -18,7 +18,7 @@ L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **p
 | **Attaquant** | **Kali Linux** (Red Team Ops) | ✅ Déployé |
 | **Victime 1** | **Windows 11 Enterprise** (Client) | ✅ Déployé |
 | **Victime 2** | **Ubuntu Desktop** (Serveur Web/App) | ✅ Déployé |
-| **AD Server** | **Windows Server 2019** (Active Directory) | ⏳ À faire |
+| **AD Server** | **Windows Server 2019** (Active Directory) | ✅ Déployé |
 | **SIEM** | **Splunk Enterprise** (Log Management) | ⏳ À faire |
 
 ## 📅 Roadmap & Progression (Cycle de vie SOC)
@@ -28,7 +28,7 @@ L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **p
 - [x] Installation de l'hyperviseur et segmentation réseau (PfSense).
 - [x] Déploiement des postes clients (Windows 11, Ubuntu).
 - [x] Déploiement de la machine attaquante (Kali).
-- [ ] Installation du Contrôleur de Domaine (Windows Server 2019).
+- [x] Installation du Contrôleur de Domaine (Windows Server 2019).
 - [ ] Exposition volontaire de services (HTTP, SSH, RDP).
 - [ ] **Livrable :** Cartographie + Preuve d'exposition.
 
