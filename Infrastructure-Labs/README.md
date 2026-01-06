@@ -29,11 +29,11 @@ Voici la liste des machines virtuelles déployées dans le laboratoire à ce jou
 
 | Machine | Rôle | OS | IP (LAN) | Ressources (vCPU/RAM) | Interfaces |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **pfSense** | Gateway, Firewall, DHCP, DNS | FreeBSD | `192.168.50.1` | 1 vCPU / 1 GB | **WAN:** Pont (Bridge)<br>**LAN:** Interne (`pfsense_lan`) |
-| **Windows Server** | Contrôleur de Domaine (AD) | Server 2019 | `192.168.50.10` | 2 vCPU / 4 GB | **Eth0:** Interne |
-| **Kali Linux** | Attaquant, Scan, Audit | Kali Rolling (Debian) | `192.168.50.101` | 2 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
+| **pfSense** | Gateway, Firewall, DHCP, DNS | FreeBSD | `192.168.50.1` | 2 vCPU / 2 GB | **WAN:** Pont (Bridge)<br>**LAN:** Interne (`pfsense_lan`) |
+| **Windows Server** | Contrôleur de Domaine (AD) | Server 2019 | `192.168.50.10` | 4 vCPU / 8 GB | **Eth0:** Interne |
+| **Kali Linux** | Attaquant, Scan, Audit | Kali Rolling (Debian) | `192.168.50.101` | 4 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
 | **Ubuntu Desktop** | Machine Cible, Serveur Web/SSH | Ubuntu 24.04 LTS | `192.168.50.102` | 2 vCPU / 4 GB | **Enp0s3:** Interne (`pfsense_lan`) |
-| **Windows 11** | Machine Cible, Endpoint Utilisateur | Windows 11 Pro | `192.168.50.100` | 2 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
+| **Windows 11** | Machine Cible, Endpoint Utilisateur | Windows 11 Pro | `192.168.50.100` | 4 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
 
 ---
 
@@ -110,7 +110,7 @@ Ce laboratoire a été conçu pour répondre à trois objectifs pédagogiques :
 ## 6. Prochaines Étapes
 
 * [ ] **Configuration Firewall :** Créer des règles strictes sur pfSense pour segmenter le trafic (DMZ vs LAN).
-* [ ] **Active Directory :** Promouvoir la machine Windows en Contrôleur de Domaine pour simuler un environnement d'entreprise.
+* [x] **Active Directory :** Promouvoir la machine Windows en Contrôleur de Domaine pour simuler un environnement d'entreprise.
 * [ ] **Monitoring :** Installer **Sysmon** sur les endpoints Windows et rediriger les logs vers un SIEM (Splunk ou ELK Stack).
 * [ ] **IDS/IPS :** Activer Snort ou Suricata sur pfSense pour la détection d'intrusions réseau.
 
