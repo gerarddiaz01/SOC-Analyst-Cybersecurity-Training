@@ -14,7 +14,7 @@ Le réseau est isolé de l'hôte physique grâce à une segmentation stricte via
 
 ### 🗺️ Schéma Logique
 
-![Topologie Réseau du Lab SOC](Network-Topology.png)
+![Topologie Réseau du Lab SOC](images/Network-Topology.png)
 
 ### 🌐 Plages d'Adresses IP (CIDR)
 
@@ -41,8 +41,9 @@ Voici la liste des machines virtuelles déployées dans le laboratoire à ce jou
 
 Pour éviter de surcharger ce document, les configurations détaillées des composants critiques sont documentées séparément :
 
-* **[Configuration pfSense (Firewall & Règles)](PfSense-Configuration.md)**
-* **[Configuration Windows Server 2019 (IP Statique & Pare-feu)](Windows-Server-Configuration.md)**
+* 📘 **[Configuration pfSense (Firewall & Règles)](PfSense-Configuration.md)**
+* 🧱 **[Configuration Windows Server 2019 (AD & DNS)](Windows-Server-Configuration.md)**
+* 💻 **[Configuration Windows 11 (Client & Jonction Domaine)](Windows-11-Configuration.md)**
 
 ### 🔌 Réseau Interne ("Internal Network")
 

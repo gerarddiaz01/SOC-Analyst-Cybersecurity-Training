@@ -7,7 +7,7 @@ Lors du déploiement sous VirtualBox, des configurations spécifiques ont été 
 * **Installation Manuelle :** Désactivation de l'option "Unattended Installation" de VirtualBox pour éviter l'erreur de licence EULA.
 * **Guest Additions :** Installation des outils invités pour la gestion de l'affichage et de la souris.
 
-## 2. Configuration Réseau (Adressage Statique)
+## 2.a Configuration Réseau (Adressage Statique)
 Contrairement aux clients (Windows 11 / Ubuntu), le futur Contrôleur de Domaine nécessite une IP fixe pour être joignable en permanence.
 
 * **Interface :** Ethernet0
@@ -20,6 +20,13 @@ Contrairement aux clients (Windows 11 / Ubuntu), le futur Contrôleur de Domaine
 | **Passerelle** | `192.168.50.1` | Vers pfSense LAN |
 | **DNS Préféré** | `192.168.50.1` | (Sera remplacé par 127.0.0.1 après promotion AD) |
 
+## 2b. Synchronisation Temporelle (NTP & Kerberos)
+Un pré-requis critique pour le fonctionnement d'Active Directory est la précision de l'heure système. Le protocole d'authentification **Kerberos** ne tolère pas un décalage supérieur à 5 minutes entre le client et le serveur.
+
+* **Problème rencontré :** Décalage de fuseau horaire sur l'hôte physique.
+* **Solution :** Utilisation de la synchronisation native via les *VirtualBox Guest Additions*.
+* **Validation :** L'heure du serveur (`SRV-AD01`) est synchronisée avec celle des futurs clients pour garantir la délivrance des tickets Kerberos (TGT).
+
 ## 3. Configuration du Pare-feu (Firewall Rules)
 Par défaut, Windows Server bloque les requêtes ICMP (Ping), ce qui empêche la vérification de la connectivité réseau.
 
@@ -30,3 +37,23 @@ Par défaut, Windows Server bloque les requêtes ICMP (Ping), ce qui empêche la
     * *Profil :* Domaine / Privé / Public
 
 > **Résultat :** Le serveur répond désormais aux pings provenant de Kali Linux et Ubuntu, validant la visibilité réseau.
+
+## 4. Services Active Directory (AD DS)
+
+Le serveur a été promu en tant que **Contrôleur de Domaine (DC)** principal pour centraliser la gestion des identités et des accès.
+
+* **Nom de Domaine (FQDN) :** `ironcorp.local`
+* **Nom NetBIOS :** `IRONCORP`
+* **Niveau fonctionnel de la forêt :** Windows Server 2016 (compatibilité maximale pour le lab).
+
+### 👥 Gestion des Utilisateurs (Exemple)
+Un compte utilisateur standard a été créé pour simuler un employé et tester l'authentification Kerberos depuis les postes clients.
+
+* **Utilisateur :** Alice
+* **Login :** `IRONCORP\alice`
+* **Statut :** Membre du groupe "Utilisateurs du domaine".
+
+## 5. Intégration des Postes Clients (Join Domain)
+La machine **Windows 11** a été jointe au domaine avec succès.
+* **Pré-requis DNS :** Le DNS du client a dû pointer manuellement vers `192.168.50.10` (IP du DC) pour résoudre le nom de domaine.
+* **Validation :** Authentification réussie avec le compte `Alice` depuis le poste client.
