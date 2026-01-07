@@ -167,3 +167,9 @@ Le script est sur ma machine, mais il s'exécute sur le serveur.
 ```powershell
 Invoke-Command -FilePath c:\scripts\audit.ps1 -ComputerName Serveur01
 ```
+
+**2. Lancer une commande directe (sans fichier) :**
+Ici, on demande au serveur distant de nous donner sa culture (langue/région) en utilisant des identifiants spécifiques.
+```powershell
+Invoke-Command -ComputerName Serveur01 -Credential Domaine\User -ScriptBlock { Get-Culture }
+```
