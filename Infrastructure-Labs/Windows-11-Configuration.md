@@ -53,3 +53,15 @@ Le bon fonctionnement de la relation de confiance (Trust Relationship) a été v
 
 ![Preuve de Jonction au Domaine](images/preuve-ad-alice.png)
 *(Commande `whoami` et `ipconfig /all` confirmant le suffixe DNS)*
+
+## 7. Application des Stratégies de Sécurité (GPO)
+
+Une fois joint au domaine, le poste client n'est plus géré localement mais via des directives centralisées (GPO) envoyées par le Contrôleur de Domaine.
+
+### 🛡️ Pare-feu & Monitoring
+* **État initial :** Le pare-feu local bloquait tout trafic ICMP (Ping), rendant la machine invisible pour les outils d'administration.
+* **Politique appliquée :** `GPO_Allow_Ping_ICMP` (Définie sur le serveur).
+* **Vérification :**
+    1.  Exécution de la commande `gpupdate /force` pour récupérer les dernières stratégies.
+    2.  Le pare-feu indique désormais : *"Pour votre sécurité, certains paramètres sont gérés par votre administrateur système"*.
+    3.  Le ping depuis le serveur (`192.168.50.10`) vers ce client (`192.168.50.100`) fonctionne.

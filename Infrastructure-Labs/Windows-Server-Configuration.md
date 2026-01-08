@@ -57,3 +57,22 @@ Un compte utilisateur standard a été créé pour simuler un employé et tester
 La machine **Windows 11** a été jointe au domaine avec succès.
 * **Pré-requis DNS :** Le DNS du client a dû pointer manuellement vers `192.168.50.10` (IP du DC) pour résoudre le nom de domaine.
 * **Validation :** Authentification réussie avec le compte `Alice` depuis le poste client.
+
+## 6. Gestion Centralisée (GPO - Group Policy Object)
+
+Afin d'éviter la configuration manuelle et répétitive sur chaque poste client, la gestion de la sécurité a été centralisée via les GPO Active Directory.
+
+### 🔹 Cas pratique : Supervision Réseau (ICMP)
+Par défaut, le pare-feu de Windows 11 bloque les requêtes ping entrantes, empêchant le monitoring par le serveur. Plutôt qu'une modification locale, une stratégie globale a été appliquée.
+
+* **Organisation :** Création d'une Unité d'Organisation (OU) nommée **`Postes de Travail`** pour cibler spécifiquement les ordinateurs clients.
+* **GPO Créée :** `GPO_Allow_Ping_ICMP`
+* **Configuration :**
+    * *Chemin :* Configuration ordinateur > Stratégies > Paramètres Windows > Paramètres de sécurité > Pare-feu Windows Defender.
+    * *Règle :* Autoriser le trafic entrant **ICMPv4** (Echo Request).
+    * *Profil :* Restreint au profil **Domaine** uniquement (Sécurité).
+
+> **Résultat :** Après un `gpupdate /force` sur le client, la règle s'est appliquée automatiquement, permettant au serveur de pinger Windows 11 sans intervention locale de l'utilisateur.
+
+![Création de la GPO](images/gpo-allow-ping-config.png)
+*(Détail de la règle entrante autorisant le protocole ICMPv4)*
