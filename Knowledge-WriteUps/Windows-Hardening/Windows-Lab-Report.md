@@ -67,4 +67,21 @@
     ![Test Alice Access Denied](../images/alice-no-lecture.png)
     *(Test Alice (Intruse) : Windows bloque l'accès à la racine du dossier, confirmant l'isolation totale).*
 
-    
+### ✅ Mission 6 : Administration Locale & UAC (Windows 11) (Validée)
+* **Objectif :** Créer un compte d'administration de secours (hors domaine) et durcir le niveau de l'UAC (User Account Control) pour maximiser la sécurité locale.
+* **Actions exécutées :**
+    1.  **Compte de Secours :** Via `lusrmgr.msc`, création de l'utilisateur `Support_Local` et ajout au groupe *Administrateurs* local. Cela garantit un accès même si le contrôleur de domaine (AD) est hors ligne.
+    2.  **Test UAC Standard :** Connexion avec `.\Support_Local`. Tentative d'exécution de CMD en tant qu'administrateur. La fenêtre UAC apparaît, prouvant que même un admin doit confirmer ses actions sensibles.
+    3.  **Hardening (Durcissement) :** Modification des paramètres de contrôle de compte utilisateur vers le niveau maximum **"Toujours m'avertir"**.
+    4.  **Test UAC Renforcé :** Lancement de `services.msc`. L'UAC intercepte maintenant l'ouverture de la console de gestion, ce qui n'était pas systématique ou aussi restrictif au niveau par défaut.
+* **Preuve de réussite :**
+    ![Local Admin User](../images/lusrmgr-support-local.png)
+    *(Création du compte de secours : L'utilisateur Support_Local est bien membre du groupe Administrateurs, indépendant du domaine).*
+    ![UAC CMD](../images/UAC-control.png)
+    *(Test initial : L'UAC intercepte l'élévation de privilèges pour l'invite de commande).*
+
+    ![UAC Max Config](../images/UAC-maximum.png)
+    *(Configuration : Réglage du curseur sur le niveau de sécurité le plus élevé).*
+
+    ![UAC Services](../images/UAC-services.png)
+    *(Test final : Avec le réglage maximum, l'accès aux consoles système comme Services.msc déclenche systématiquement une alerte).*
