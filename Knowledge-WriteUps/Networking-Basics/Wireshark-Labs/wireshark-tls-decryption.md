@@ -27,7 +27,7 @@ Pour déchiffrer le flux, j'ai importé le fichier des clés maîtres (`ssl-key.
 * **Champ :** `(Pre)-Master-Secret log filename`
 
 ![Configuration des préférences TLS dans Wireshark](../../images/ssl-key-wireshark.png)
-*Figure 1 : Injection du fichier de clés SSL dans Wireshark.*
+*Injection du fichier de clés SSL dans Wireshark.*
 
 ### 2. Identification du trafic suspect
 Une fois les clés chargées, Wireshark rafraîchit la vue. On observe un changement immédiat :
@@ -39,7 +39,7 @@ Pour trouver rapidement les tentatives de connexion, j'ai utilisé la fonction d
 * **Recherche :** "login"
 
 ![Recherche du paquet login via Ctrl+F](../../images/ctrl-f-string-wireshark.png)
-*Figure 2 : Localisation des paquets HTTP POST contenant le terme "login".*
+*Localisation des paquets HTTP POST contenant le terme "login".*
 
 ### 3. Extraction des identifiants (Le Flag)
 J'ai identifié une requête **POST** vers `/login/?privacy_mutation...`. En effectuant un clic droit -> **Follow -> HTTP Stream**, j'ai pu isoler le flux de données complet de cette transaction.
@@ -47,7 +47,7 @@ J'ai identifié une requête **POST** vers `/login/?privacy_mutation...`. En eff
 Dans le corps de la requête (Body), les données du formulaire sont visibles :
 
 ![Analyse du flux HTTP et extraction du mot de passe](../../images/post-method-wireshark.png)
-*Figure 3 : Visualisation des données POST déchiffrées.*
+*Visualisation des données POST déchiffrées.*
 
 **Données brutes extraites :**
 ```text
