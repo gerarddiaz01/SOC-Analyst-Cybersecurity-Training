@@ -1,4 +1,4 @@
-## ⌨️ 1. CMD : Reconnaissance Système & Bases
+## 1. CMD : Reconnaissance Système & Bases
 
 Avant d'utiliser des outils complexes, il faut savoir interroger le système avec les commandes natives (Living off the Land).
 

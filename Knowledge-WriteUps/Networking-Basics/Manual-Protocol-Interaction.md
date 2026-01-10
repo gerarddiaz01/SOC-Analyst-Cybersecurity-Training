@@ -1,4 +1,4 @@
-# 🌐 Interaction Manuelle avec les Protocoles Réseau (CLI)
+# Interaction Manuelle avec les Protocoles Réseau (CLI)
 
 Ce laboratoire documente l'exploration et l'interaction manuelle avec les protocoles de la couche Application (Modèle OSI Layer 7) en utilisant des outils en ligne de commande (CLI) comme `telnet`, `ftp` et `whois`.
 

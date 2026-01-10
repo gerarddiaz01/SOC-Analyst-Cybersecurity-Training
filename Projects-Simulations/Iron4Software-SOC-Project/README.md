@@ -1,15 +1,15 @@
-# 🏭 Projet Fil Rouge : Iron4Software SOC Implementation
+# Projet Fil Rouge : Iron4Software SOC Implementation
 
 ![Status](https://img.shields.io/badge/Status-Phase_1_En_Cours-orange?style=flat-square)
 ![Type](https://img.shields.io/badge/Type-Blue_Team_%26_Architecture-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Splunk_SIEM-000000?style=flat-square&logo=splunk)
 
-## 📖 Contexte & Scénario
+## Contexte & Scénario
 Ce projet simule une mission réelle pour l'entreprise **Iron4Software**, une TPE de 25 salariés éditrice de l'ERP *IronSuite*.
 * **Contexte :** Croissance rapide, infrastructure non sécurisée.
 * **Mission :** Audit, Durcissement (Hardening), Déploiement SOC (Splunk) et Gestion de Crise.
 
-## 🏗️ Architecture du Lab (État Actuel)
+## Architecture du Lab (État Actuel)
 L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **pfSense**.
 
 | Machine | OS & Rôle | Statut |
@@ -21,7 +21,7 @@ L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **p
 | **AD Server** | **Windows Server 2019** (Active Directory) | ✅ Déployé |
 | **SIEM** | **Splunk Enterprise** (Log Management) | ⏳ À faire |
 
-## 📅 Roadmap & Progression (Cycle de vie SOC)
+## Roadmap & Progression (Cycle de vie SOC)
 
 ### Phase 1 : Infrastructure & Exposition [En Cours]
 *Objectif : Construire une infrastructure vulnérable (Bad configuration by design).*
@@ -36,14 +36,14 @@ L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **p
 *Objectif : Identifier les failles avant correction.*
 - [ ] Scan de vulnérabilités (Nmap, Nessus).
 - [ ] Exécution d'attaques : Brute-force (Hydra), SQL Injection, XSS.
-- [ ] **Livrable :** 📄 Rapport d'audit initial (Findings & Preuves).
+- [ ] **Livrable :** Rapport d'audit initial (Findings & Preuves).
 
 ### Phase 3 : Durcissement (Blue Team - Hardening)
 *Objectif : Remédier aux failles découvertes.*
 - [ ] Mise en place de politiques de mots de passe (GPO) et MFA.
 - [ ] Durcissement OS & Fermeture des ports inutiles.
 - [ ] Sauvegardes chiffrées.
-- [ ] **Livrable :** 📄 Rapport de configuration Avant/Après.
+- [ ] **Livrable :** Rapport de configuration Avant/Après.
 
 ### Phase 4 : Détection & Supervision (Splunk)
 *Objectif : Voir l'invisible.*
@@ -53,13 +53,13 @@ L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **p
     - [ ] Détection Brute-force SSH.
     - [ ] Création de compte admin suspect.
     - [ ] Scan de ports interne.
-- [ ] **Livrable :** 📄 Rapport de surveillance (Captures + Règles).
+- [ ] **Livrable :** Rapport de surveillance (Captures + Règles).
 
 ### Phase 5 à 7 : Incident Response & Forensics
 - [ ] **Phase 5 (Re-Attaque) :** Vérification de l'efficacité des mesures.
 - [ ] **Phase 6 (IR) :** Simulation d'incident (Containment, Eradication, Recovery).
 - [ ] **Phase 7 (Forensics) :** Analyse post-mortem, Timeline, IOCs.
-- [ ] **Livrables :** 📄 Playbook IR + Rapport Forensique.
+- [ ] **Livrables :** Playbook IR + Rapport Forensique.
 
 ### Phase 8 : Management & REX
 - [ ] Communication de crise (Simulation direction/clients).
@@ -67,7 +67,7 @@ L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **p
 
 ---
 
-## 📂 Organisation des Dossiers
+## Organisation des Dossiers
 
 Ce dépôt reflète la structure des livrables attendus par le jury :
 

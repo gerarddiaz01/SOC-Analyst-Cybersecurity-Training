@@ -1,4 +1,4 @@
-# 🪟 Windows & Active Directory Master Cheat Sheet (SOC Edition)
+# Windows & Active Directory Master Cheat Sheet (SOC Edition)
 
 ![Category](https://img.shields.io/badge/Category-Windows_Forensics-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Active_Directory_%26_Logs-red?style=flat-square)

@@ -1,4 +1,4 @@
-## 🧪 Missions Pratiques (Home Lab - Niveau Avancé)
+## Missions Pratiques (Home Lab - Niveau Avancé)
 
 Exercices réalisés sur mon environnement virtuel (Ubuntu/Kali) pour valider les compétences SOC.
 

@@ -1,16 +1,16 @@
-# 🧠 Base de Connaissances & Write-Ups
+# Base de Connaissances & Write-Ups
 
 ![Category](https://img.shields.io/badge/Category-Knowledge_Base-blue?style=flat-square)
 ![Source](https://img.shields.io/badge/Source-TryHackMe_%26_Master_SOC-red?style=flat-square)
 ![Policy](https://img.shields.io/badge/Policy-No_Spoilers-success?style=flat-square)
 
-## 📖 À propos de ce dossier
+## À propos de ce dossier
 
 Ce répertoire centralise mes fiches de synthèse, mes retours d'expérience (Write-Ups) et mes notes techniques acquises au cours de ma formation d'**Analyste SOC** et de mes entraînements pratiques (CTF, Labs).
 
 L'objectif n'est pas de fournir des solutions prêtes à l'emploi, mais de **documenter ma méthodologie d'apprentissage**, les commandes utiles et les concepts clés que j'ai maîtrisés.
 
-## 🗂️ Structure thématique
+## Structure thématique
 
 Les connaissances sont organisées par domaines de compétence du référentiel SOC :
 

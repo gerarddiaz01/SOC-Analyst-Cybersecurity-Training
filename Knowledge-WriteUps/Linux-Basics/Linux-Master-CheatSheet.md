@@ -1,4 +1,4 @@
-# 🐧 Linux Master Cheat Sheet (SOC Edition)
+# Linux Master Cheat Sheet (SOC Edition)
 
 ![Category](https://img.shields.io/badge/Category-System_Administration-orange?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Bash_Scripting_%26_Forensics-green?style=flat-square)

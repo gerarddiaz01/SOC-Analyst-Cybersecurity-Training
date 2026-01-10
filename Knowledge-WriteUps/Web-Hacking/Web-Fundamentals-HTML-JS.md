@@ -1,4 +1,4 @@
-# 🕸️ Architecture Web & Client-Side Mechanics (HTML/JS)
+# Architecture Web & Client-Side Mechanics (HTML/JS)
 
 ![Category](https://img.shields.io/badge/Category-Web_Security-blueviolet?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Code_Analysis-orange?style=flat-square)

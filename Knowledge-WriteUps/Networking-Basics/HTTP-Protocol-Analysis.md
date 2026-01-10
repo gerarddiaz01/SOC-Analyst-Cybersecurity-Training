@@ -1,4 +1,4 @@
-# 🌐 Analyse du Protocole HTTP (HyperText Transfer Protocol)
+# Analyse du Protocole HTTP (HyperText Transfer Protocol)
 
 ![Category](https://img.shields.io/badge/Category-Network_%26_Web-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Log_Analysis-orange?style=flat-square)

@@ -1,4 +1,4 @@
-# 🛡️ Lab Report: Stormshield Network Security (CSNA)
+# Lab Report: Stormshield Network Security (CSNA)
 
 Ce document retrace mes laboratoires pratiques réalisés dans le cadre de la préparation à la certification **CSNA (Certified Stormshield Network Administrator)**. L'environnement utilisé est une machine virtuelle Stormshield (EVA) déployée dans un hyperviseur.
 
