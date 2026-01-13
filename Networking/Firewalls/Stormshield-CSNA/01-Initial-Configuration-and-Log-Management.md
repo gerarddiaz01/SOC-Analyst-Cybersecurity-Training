@@ -16,6 +16,7 @@ J'ai segmenté le réseau en trois zones de sécurité distinctes pour respecter
 
 ### 🗺️ Schéma Topologique
 ![Architecture Topologique avec Zones](images/topology_lab1.png)
+
 *(Ce schéma illustre la segmentation réseau et l'adressage IP mis en place)*
 
 ### Plan d'Adressage IP
