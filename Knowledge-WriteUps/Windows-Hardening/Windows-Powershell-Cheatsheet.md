@@ -99,7 +99,7 @@ Pour l'audit et l'administration, PowerShell permet de récupérer des informati
 Pour trouver rapidement les administrateurs ou les comptes actifs :
 `Get-LocalUser | Where-Object Enabled -eq $True`
 
-## 🔍 Analyse Système Temps Réel & Forensique
+## Analyse Système Temps Réel & Forensique
 
 Cette section couvre les commandes essentielles pour surveiller l'activité dynamique du système (processus, réseau) et effectuer des analyses d'intégrité de base.
 

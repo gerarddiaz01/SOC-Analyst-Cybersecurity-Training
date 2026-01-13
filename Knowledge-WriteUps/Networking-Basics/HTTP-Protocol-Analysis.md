@@ -3,10 +3,10 @@
 ![Category](https://img.shields.io/badge/Category-Network_%26_Web-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Log_Analysis-orange?style=flat-square)
 
-## 🎯 Objectif
+## Objectif
 Comprendre la structure brute des requêtes et réponses HTTP pour être capable d'analyser le trafic web et les logs de serveurs (Apache/Nginx/IIS) dans un contexte de SOC.
 
-## 🧠 Concepts Techniques Clés
+## Concepts Techniques Clés
 
 ### 1. Structure d'une Requête
 Le protocole est "Stateless" (sans état). Chaque requête est indépendante.
@@ -31,7 +31,7 @@ Voici comment j'interprète les codes lors d'une investigation :
 * **Cookie :** Utilisé pour le suivi de session (risque de vol de session / Hijacking).
 * **Host :** Indispensable dans les environnements virtualisés (Vhosts).
 
-## 🛠️ Exercice Pratique : Manipulation de Requêtes Brutes
+## Exercice Pratique : Manipulation de Requêtes Brutes
 
 Dans le cadre du module "HTTP in Detail", j'ai utilisé un émulateur de client HTTP pour forger manuellement des paquets et interagir avec une API REST. Voici les scénarios techniques réalisés :
 
@@ -39,24 +39,24 @@ Dans le cadre du module "HTTP in Detail", j'ai utilisé un émulateur de client 
 * **Action :** Requête simple vers `/room`.
 * **Action avec Paramètre :** Requête vers `/blog` en ciblant un ID spécifique (`id=1`).
     * **Commande :** `GET /blog?id=1 HTTP/1.1`
-    * **🛡️ Note d'Analyste :** Les paramètres passés via `GET` sont visibles dans l'URL. Si une application y passe des tokens ou mots de passe, ils apparaîtront en clair dans les logs du serveur et du proxy (Incident de fuite de données).
+    * **Note d'Analyste :** Les paramètres passés via `GET` sont visibles dans l'URL. Si une application y passe des tokens ou mots de passe, ils apparaîtront en clair dans les logs du serveur et du proxy (Incident de fuite de données).
 
 ### 2. Actions Destructives (DELETE)
 * **Action :** Suppression de l'utilisateur ID 1.
     * **Commande :** `DELETE /user/1 HTTP/1.1`
-    * **🛡️ Note d'Analyste :** La méthode `DELETE` est rarement autorisée pour les utilisateurs standards. Voir cette méthode dans des logs provenant d'une IP externe est souvent un indicateur de compromission ou de tentative d'exploitation d'API.
+    * **Note d'Analyste :** La méthode `DELETE` est rarement autorisée pour les utilisateurs standards. Voir cette méthode dans des logs provenant d'une IP externe est souvent un indicateur de compromission ou de tentative d'exploitation d'API.
 
 ### 3. Modification de Données (PUT)
 * **Action :** Mise à jour des privilèges de l'utilisateur 2 (`username=admin`).
     * **Commande :** `PUT /user/2` avec le corps `username=admin`.
-    * **🛡️ Note d'Analyste :** Contrairement à `POST` (création), `PUT` remplace ou met à jour une ressource existante. C'est un vecteur classique pour l'escalade de privilèges (IDOR) si l'API ne vérifie pas correctement qui fait la demande.
+    * **Note d'Analyste :** Contrairement à `POST` (création), `PUT` remplace ou met à jour une ressource existante. C'est un vecteur classique pour l'escalade de privilèges (IDOR) si l'API ne vérifie pas correctement qui fait la demande.
 
 ### 4. Authentification (POST)
 * **Action :** Tentative de connexion avec credentials (`thm` / `letmein`).
     * **Commande :** `POST /login` avec le corps `username=thm&password=letmein`.
-    * **🛡️ Note d'Analyste :** Les données sensibles sont envoyées dans le *Body* de la requête, et non dans l'URL. Cependant, sans HTTPS (TLS), ces identifiants passent en clair sur le réseau et sont capturables via Wireshark.
+    * **Note d'Analyste :** Les données sensibles sont envoyées dans le *Body* de la requête, et non dans l'URL. Cependant, sans HTTPS (TLS), ces identifiants passent en clair sur le réseau et sont capturables via Wireshark.
 
 > **Note :** Cet exercice démontre pourquoi la validation des entrées côté serveur est cruciale, car le client (navigateur) peut être entièrement manipulé par un attaquant.
 
-## 🛡️ Takeaway pour l'Analyste SOC
+## Takeaway pour l'Analyste SOC
 Comprendre HTTP est la base pour lire les logs de proxy ou de WAF (Web Application Firewall). Une attaque ne se voit souvent que par une anomalie subtile dans un Header ou une séquence de codes 4xx suivie d'un 200 (Brute-force réussi).

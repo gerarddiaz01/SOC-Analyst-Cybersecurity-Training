@@ -12,13 +12,13 @@ Avant d'utiliser des outils complexes, il faut savoir interroger le système ave
 | `cls` | Nettoie l'écran (Clear Screen). | `cls` |
 | `help` | Affiche l'aide pour une commande. | `help [commande]` |
 
-### ⚡ Le concept du Pipe (`|`)
+### Le concept du Pipe (`|`)
 Le symbole `|` permet d'envoyer le résultat d'une commande vers une autre.
 * **Usage courant :** Quand une commande crache trop de texte (comme `driverquery`), on utilise `more` pour lire page par page.
 * **Syntaxe :** `commande_bavarde | more`
 * **Navigation :** `Espace` pour avancer, `Ctrl+C` pour quitter.
 
-## 🌐 2. Network Troubleshooting & Discovery
+## 2. Network Troubleshooting & Discovery
 
 Commandes pour analyser les connexions actives et la configuration réseau.
 
@@ -31,7 +31,7 @@ Commandes pour analyser les connexions actives et la configuration réseau.
 | `nslookup [domain]` | Résolution de nom (DNS). Transforme `www.google.com` en IP. | **Crucial.** Permet de repérer si un domaine pointe vers une IP connue comme malveillante (C2). |
 | `netstat` | Affiche les connexions réseaux actives. | **L'outil roi.** Permet de voir qui est connecté à la machine. |
 
-### 🕵️ Focus sur Netstat (La chasse aux connexions)
+### Focus sur Netstat (La chasse aux connexions)
 L'analyste utilise rarement `netstat` seul. On utilise des "flags" pour avoir des détails :
 * **Commande SOC :** `netstat -ano` (ou `-abon` si admin)
     * `-a` : Affiche tout (Listening ports + Established connections).
@@ -39,7 +39,7 @@ L'analyste utilise rarement `netstat` seul. On utilise des "flags" pour avoir de
     * `-o` : Affiche le **PID** (Process ID). Permet de lier la connexion au processus (via Task Manager).
     * `-b` : Affiche directement le nom de l'exécutable (nécessite Admin).
 
-## 📂 3. File System Operations (Navigation & Gestion)
+## 3. File System Operations (Navigation & Gestion)
 
 Commandes pour se déplacer et manipuler les fichiers.
 
@@ -60,7 +60,7 @@ Commandes pour se déplacer et manipuler les fichiers.
 | `del [fichier]` | Supprimer un fichier (ou `erase`). | |
 | `*` (Wildcard) | Joker pour "n'importe quoi". | `del *.log` (Supprime tous les logs). `dir *.exe` (Liste tous les exécutables). |
 
-## ⚙️ 4. Process Management (Gestion des Tâches)
+## 4. Process Management (Gestion des Tâches)
 
 Identifier et arrêter les processus (programmes en cours d'exécution).
 

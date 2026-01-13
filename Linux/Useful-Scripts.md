@@ -1,4 +1,4 @@
-## 2. Script de Recherche Automatisée (Grep & Loops)
+## 1. Script de Recherche Automatisée (Grep & Loops)
 
 Ce script parcourt un dossier pour trouver un fichier contenant une chaîne de caractères spécifique (un "flag"). C'est très utile pour l'analyse de logs ou le CTF (Capture The Flag).
 

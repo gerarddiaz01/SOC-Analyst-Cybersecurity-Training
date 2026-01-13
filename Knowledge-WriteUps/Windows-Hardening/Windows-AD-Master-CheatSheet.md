@@ -3,13 +3,13 @@
 ![Category](https://img.shields.io/badge/Category-Windows_Forensics-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Active_Directory_%26_Logs-red?style=flat-square)
 
-## 📖 À propos
+## À propos
 Ce document synthétise les concepts clés de l'administration Windows et Active Directory pour un Analyste SOC. Il couvre l'analyse de processus, le système de fichiers NTFS, la gestion des identités AD et les stratégies de groupe (GPO).
 *Basé sur les modules "Windows Fundamentals" & "Active Directory Basics" (TryHackMe).*
 
 ---
 
-## 🖥️ 1. Windows Core & Forensics
+## 1. Windows Core & Forensics
 
 ### Gestion des Processus (Task Manager)
 Pour repérer des malwares ou activités suspectes.
@@ -34,7 +34,7 @@ Les journaux (Logs) sont la source principale de détection.
 
 ---
 
-## 🌲 2. Architecture Active Directory (AD)
+## 2. Architecture Active Directory (AD)
 
 Active Directory est l'annuaire centralisé utilisé pour gérer les identités et les accès dans un réseau d'entreprise.
 
@@ -52,7 +52,7 @@ Active Directory est l'annuaire centralisé utilisé pour gérer les identités 
 
 ---
 
-## 🛡️ 3. Sécurité & Hardening (GPO)
+## 3. Sécurité & Hardening (GPO)
 
 Les **Group Policy Objects (GPO)** permettent d'appliquer des configurations de sécurité à tout le parc informatique d'un coup.
 
@@ -65,7 +65,7 @@ Les **Group Policy Objects (GPO)** permettent d'appliquer des configurations de 
 
 ---
 
-## 🔍 Cheat Sheet : Event IDs Critiques (Windows Security)
+## Cheat Sheet : Event IDs Critiques (Windows Security)
 
 Codes à connaître par cœur pour l'analyse de logs.
 

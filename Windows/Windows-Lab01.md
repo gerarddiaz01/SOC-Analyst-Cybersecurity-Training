@@ -1,3 +1,7 @@
+## Missions Pratiques (Home Lab)
+
+Exercices réalisés sur mon environnement virtuel (Windows 11/Windows Server 2019) pour valider les compétences SOC.
+
 ### ✅ Mission 1 : Forensics & Processus (Windows 11) (Validée)
 * **Objectif :** Identifier manuellement des processus suspects via leur PID et les neutraliser en ligne de commande (Simulation de réponse à incident).
 * **Commandes exécutées :**

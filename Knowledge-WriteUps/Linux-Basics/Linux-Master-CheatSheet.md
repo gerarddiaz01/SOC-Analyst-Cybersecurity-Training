@@ -9,7 +9,7 @@ Ce document synthétise les commandes Linux essentielles pour un Analyste SOC. I
 
 ---
 
-## 📂 1. Navigation & Gestion de Fichiers (Survival Kit)
+## 1. Navigation & Gestion de Fichiers (Survival Kit)
 
 | Commande | Description & Usage SOC | Exemple |
 | :--- | :--- | :--- |
@@ -24,7 +24,7 @@ Ce document synthétise les commandes Linux essentielles pour un Analyste SOC. I
 
 ---
 
-## 🔍 2. Recherche & Manipulation de Texte (Grep Ninja)
+## 2. Recherche & Manipulation de Texte (Grep Ninja)
 
 L'arme principale pour l'analyse de logs.
 
@@ -38,7 +38,7 @@ L'arme principale pour l'analyse de logs.
 
 ---
 
-## 🛡️ 3. Permissions & Utilisateurs
+## 3. Permissions & Utilisateurs
 
 Comprendre qui a le droit de faire quoi (Concept clé : `r=4`, `w=2`, `x=1`).
 
@@ -53,7 +53,7 @@ Comprendre qui a le droit de faire quoi (Concept clé : `r=4`, `w=2`, `x=1`).
 
 ---
 
-## ⚙️ 4. Processus & Système
+## 4. Processus & Système
 
 Pour repérer ce qui tourne sur la machine (et détecter les activités anormales).
 
@@ -66,7 +66,7 @@ Pour repérer ce qui tourne sur la machine (et détecter les activités anormale
 
 ---
 
-## 📡 5. Réseau & Transfert (SSH/SCP)
+## 5. Réseau & Transfert (SSH/SCP)
 
 | Commande | Description |
 | :--- | :--- |
