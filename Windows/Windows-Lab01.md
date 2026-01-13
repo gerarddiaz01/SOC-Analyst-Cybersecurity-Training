@@ -11,7 +11,7 @@ Exercices réalisés sur mon environnement virtuel (Windows 11/Windows Server 20
         * `taskkill /PID 4156 /F`
         * `taskkill /PID 1924 /F`
 * **Preuve de réussite :**
-    ![Process Kill Windows](../images/pid-taskkill.png)
+    ![Process Kill Windows](../Knowledge-WriteUps/images/testing/pid-taskkill.png)
     *(Confirmation : Les processus ont été terminés avec succès ("Opération réussie") correspondant aux PID ciblés).*
 
 ### ✅ Mission 2 : Logs & Audit de Sécurité (Windows 11) (Validée)
@@ -22,7 +22,7 @@ Exercices réalisés sur mon environnement virtuel (Windows 11/Windows Server 20
     3.  **Filtrage :** Dans *Journaux Windows > Sécurité*, application d'un filtre sur l'ID d'événement **4625** (Échec d'ouverture de session).
     4.  **Analyse :** Identification de l'événement correspondant à l'heure exacte de la tentative pour isoler l'incident.
 * **Preuve de réussite :**
-    ![Event Viewer 4625](../images/eventviewer-logon-fail.png)
+    ![Event Viewer 4625](../Knowledge-WriteUps/images/testing/eventviewer-logon-fail.png)
     *(Capture du journal de sécurité montrant clairement l'événement 4625 "Échec de l'audit", confirmant que le système a bien tracé la tentative ratée).*
 
 ### ✅ Mission 3 : Architecte Active Directory (Windows Server) (Validée)
@@ -33,10 +33,10 @@ Exercices réalisés sur mon environnement virtuel (Windows 11/Windows Server 20
     3.  **Gestion des Accès (Groupes) :** Création du groupe de sécurité global `RH_Staff` et ajout des deux utilisateurs pour faciliter la gestion des permissions.
     4.  **Vérification (Client) :** Test de connexion réussi avec le compte de *Bob* sur la machine cliente Windows 11 jointe au domaine.
 * **Preuve de réussite :**
-    ![AD Group Members](../images/security-group-members.png)
+    ![AD Group Members](../Knowledge-WriteUps/images/testing/security-group-members.png)
     *(Confirmation côté Serveur : Bob et Clara sont bien membres du groupe de sécurité RH_Staff).*
 
-    ![User Login](../images/bob-user.png)
+    ![User Login](../Knowledge-WriteUps/images/testing/bob-user.png)
     *(Confirmation côté Client : Bob a réussi à ouvrir sa session sur le poste Windows 11 via le domaine).*
 
 ### ✅ Mission 4 : GPO & Hardening (Windows Server) (Validée)
@@ -47,10 +47,10 @@ Exercices réalisés sur mon environnement virtuel (Windows 11/Windows Server 20
     3.  **Application (Client) :** Connexion avec l'utilisateur *Bob*, exécution de `gpupdate /force` pour récupérer immédiatement la nouvelle politique.
     4.  **Test de Restriction :** Tentative d'ouverture du Panneau de configuration, bloquée par le système.
 * **Preuve de réussite :**
-    ![GPO Config](../images/gpo-interdire-panneau-configuration.png)
+    ![GPO Config](../Knowledge-WriteUps/images/testing/gpo-interdire-panneau-configuration.png)
     *(Configuration côté Serveur : La GPO est activée et liée).*
 
-    ![Access Denied Control Panel](../images/error-access-controlpanel.png)
+    ![Access Denied Control Panel](../Knowledge-WriteUps/images/testing/error-access-controlpanel.png)
     *(Validation côté Client : Message d'erreur explicite "Cette opération a été annulée en raison de restrictions...", prouvant que Bob ne peut plus accéder aux réglages).*
 
 ### ✅ Mission 5 : Gestion des Permissions NTFS & Moindre Privilège (Validée)
@@ -62,13 +62,13 @@ Exercices réalisés sur mon environnement virtuel (Windows 11/Windows Server 20
     4.  **Test 1 (Autorisation Restreinte) :** Avec *Bob* (RH), l'accès au dossier est validé, mais la création de fichiers est bloquée (Permission d'écriture absente).
     5.  **Test 2 (Refus d'accès) :** Avec *Alice* (Non-RH), l'ouverture du dossier est immédiatement bloquée par Windows.
 * **Preuve de réussite :**
-    ![Config NTFS](../images/autorisation-lecture-salaires.png)
+    ![Config NTFS](../Knowledge-WriteUps/images/testing/autorisation-lecture-salaires.png)
     *(Configuration Serveur : L'héritage est coupé. Seuls les Admins, le Système et le groupe RH_Staff [Lecture] sont listés).*
 
-    ![Test Bob Write Denied](../images/rh-only-lecture.png)
+    ![Test Bob Write Denied](../Knowledge-WriteUps/images/testing/rh-only-lecture.png)
     *(Test Bob (RH) : Il peut entrer dans le dossier (Lecture OK), mais ne peut rien créer (l'icône bouclier sur "Nouveau" prouve l'absence de droits d'écriture)).*
 
-    ![Test Alice Access Denied](../images/alice-no-lecture.png)
+    ![Test Alice Access Denied](../Knowledge-WriteUps/images/testing/alice-no-lecture.png)
     *(Test Alice (Intruse) : Windows bloque l'accès à la racine du dossier, confirmant l'isolation totale).*
 
 ### ✅ Mission 6 : Administration Locale & UAC (Windows 11) (Validée)
@@ -79,13 +79,13 @@ Exercices réalisés sur mon environnement virtuel (Windows 11/Windows Server 20
     3.  **Hardening (Durcissement) :** Modification des paramètres de contrôle de compte utilisateur vers le niveau maximum **"Toujours m'avertir"**.
     4.  **Test UAC Renforcé :** Lancement de `services.msc`. L'UAC intercepte maintenant l'ouverture de la console de gestion, ce qui n'était pas systématique ou aussi restrictif au niveau par défaut.
 * **Preuve de réussite :**
-    ![Local Admin User](../images/lusrmgr-support-local.png)
+    ![Local Admin User](../Knowledge-WriteUps/images/testing/lusrmgr-support-local.png)
     *(Création du compte de secours : L'utilisateur Support_Local est bien membre du groupe Administrateurs, indépendant du domaine).*
-    ![UAC CMD](../images/UAC-control.png)
+    ![UAC CMD](../Knowledge-WriteUps/images/testing/UAC-control.png)
     *(Test initial : L'UAC intercepte l'élévation de privilèges pour l'invite de commande).*
 
-    ![UAC Max Config](../images/UAC-maximum.png)
+    ![UAC Max Config](../Knowledge-WriteUps/images/testing/UAC-maximum.png)
     *(Configuration : Réglage du curseur sur le niveau de sécurité le plus élevé).*
 
-    ![UAC Services](../images/UAC-services.png)
+    ![UAC Services](../Knowledge-WriteUps/images/testing/UAC-services.png)
     *(Test final : Avec le réglage maximum, l'accès aux consoles système comme Services.msc déclenche systématiquement une alerte).*

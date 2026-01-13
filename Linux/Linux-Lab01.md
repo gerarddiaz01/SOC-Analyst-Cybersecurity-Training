@@ -18,7 +18,7 @@ Exercices réalisés sur mon environnement virtuel (Ubuntu/Kali) pour valider le
     3.  `nano journal.txt` (Édition manuelle pour ajouter la ligne de conclusion).
     4.  `cat journal.txt` (Affichage final pour validation).
 * **Preuve de réussite :**
-    ![Preuve Mission 2](../images/linux-mission2-proof.png)
+    ![Preuve Mission 2](../Knowledge-WriteUps/images/testing/linux-mission2-proof.png)
     *(Le fichier contient bien les 3 lignes chronologiques).*
 
 ### ✅ Mission 3 : Gestion des Droits, Isolation & Chmod (Validée)
@@ -30,32 +30,32 @@ Exercices réalisés sur mon environnement virtuel (Ubuntu/Kali) pour valider le
     2.  **Test Système & Création :**
         * Tentative de création dans `/etc` -> **Échec** (Protection système).
         * Création de `test_partage.txt` dans `/tmp` -> **Succès**.
-        ![Test Système](../images/linux-mission3-proof1.png)
+        ![Test Système](../Knowledge-WriteUps/images/testing/linux-mission3-proof1.png)
 
     3.  **Test de Vulnérabilité (User1) :**
         * Connexion avec `su - user1`.
         * Tentative de suppression -> **Échec** (Sticky bit sur /tmp).
         * Tentative de lecture -> **Succès** (Par défaut, les fichiers sont lisibles par tous).
         * Tentative d'écriture -> **Échec** (Pas de permissions).
-        ![Test User1](../images/linux-mission3-proof2.png)
+        ![Test User1](../Knowledge-WriteUps/images/testing/linux-mission3-proof2.png)
 
     4.  **Durcissement (Admin) :**
         * Ajout de contenu sensible ("Hello").
         * Application du **Moindre Privilège** : `chmod 600 test_partage.txt` (Lecture/Écriture pour le propriétaire uniquement).
         * Vérification avec `ls -l` : Les droits sont passés de `-rw-rw-r--` à `-rw-------`.
-        ![Hardening](../images/linux-mission3-proof3.png)
+        ![Hardening](../Knowledge-WriteUps/images/testing/linux-mission3-proof3.png)
 
     5.  **Verrouillage Final avec chown (Admin) :**
         * Transfert à Root : `sudo chown root:root test_partage.txt`.
         * Test d'accès admin : `cat test_partage.txt` -> **Permission Denied** (Même l'admin est bloqué !).
         * C'est la protection maximale.
         * Avec sudo ça marche (sudo = root).
-        ![Chown Root](../images/linux-mission3-proof5.png)
+        ![Chown Root](../Knowledge-WriteUps/images/testing/linux-mission3-proof5.png)
 
     6.  **Validation Finale (User1) :**
         * Nouvelle tentative de lecture par `user1`.
         * Résultat : **Permission denied**. Le fichier est évidemment inaccessible par user1.
-        ![Access Denied](../images/linux-mission3-proof4.png)
+        ![Access Denied](../Knowledge-WriteUps/images/testing/linux-mission3-proof4.png)
 
 ### ✅ Mission 4 : Processus & Background (Validée)
 * **Objectif :** Gérer des tâches de fond et neutraliser un processus par son PID.
@@ -65,7 +65,7 @@ Exercices réalisés sur mon environnement virtuel (Ubuntu/Kali) pour valider le
     3.  `kill 4064` (Arrêt forcé du processus via son PID).
     4.  `ps -p 4064` (Confirmation que le processus n'existe plus).
 * **Preuve de réussite :**
-    ![Process Kill](../images/linux-mission4-proof1.png)
+    ![Process Kill](../Knowledge-WriteUps/images/testing/linux-mission4-proof1.png)
 
 ### ✅ Mission 5 : Grep & Logs (Validée)
 * **Objectif :** Extraire de l'information critique dans un fichier de log système (Compétence SOC n°1).
@@ -75,10 +75,10 @@ Exercices réalisés sur mon environnement virtuel (Ubuntu/Kali) pour valider le
     3.  **Rapport (Reporting) :** `cat auth-test.log | grep -a "auth" > incident_report.txt` (Redirection des lignes suspectes vers un fichier de preuve).
     4.  **Vérification :** `cat incident_report.txt`.
 * **Preuve de réussite :**
-    ![Log Extraction](../images/linux-mission5-proof1.png)
+    ![Log Extraction](../Knowledge-WriteUps/images/testing/linux-mission5-proof1.png)
     *(On voit bien le refus d'accès initial, puis la réussite de la copie et du grep).*
     
-    ![Report Verification](../images/linux-mission5-proof2.png)
+    ![Report Verification](../Knowledge-WriteUps/images/testing/linux-mission5-proof2.png)
     *(Le rapport contient bien les logs filtrés).*
 
 ### ✅ Mission 6 : Réseau, Exfiltration & Troubleshooting SSH (Validée)
@@ -89,17 +89,17 @@ Exercices réalisés sur mon environnement virtuel (Ubuntu/Kali) pour valider le
         * Sur Ubuntu : Exposition du dossier via `python3 -m http.server 8000`.
         * Sur Kali : Récupération via `wget http://[IP_Ubuntu]:8000/passwords.dump`.
         * *Risque démontré :* Transfert en clair, sans authentification.
-        ![Exfiltration Python](../images/linux-mission6-proof1.png)
+        ![Exfiltration Python](../Knowledge-WriteUps/images/testing/linux-mission6-proof1.png)
 
     2.  **Configuration Système (Troubleshooting) :**
         * Le transfert SCP a initialement échoué car le service SSH était éteint.
         * **Remédiation :** `sudo systemctl start ssh` puis `enable ssh` pour la persistance.
-        ![SSH Config](../images/linux-mission6-proof3.png)
+        ![SSH Config](../Knowledge-WriteUps/images/testing/linux-mission6-proof3.png)
 
     3.  **Transfert Sécurisé (Kali -> Ubuntu) :**
         * Création du script `patch_security.sh`.
         * Envoi sécurisé vers le dossier temporaire de la victime : `scp patch_security.sh admin@192.168.50.102:/tmp/`.
-        ![Secure Copy](../images/linux-mission6-proof2.png)
+        ![Secure Copy](../Knowledge-WriteUps/images/testing/linux-mission6-proof2.png)
 
 ---
 *Dernière mise à jour : Janvier 2026*

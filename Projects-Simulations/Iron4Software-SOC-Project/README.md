@@ -5,7 +5,7 @@
 ![Focus](https://img.shields.io/badge/Focus-Splunk_SIEM-000000?style=flat-square&logo=splunk)
 
 ## Contexte & Scénario
-Ce projet simule une mission réelle pour l'entreprise **Iron4Software**, une TPE de 25 salariés éditrice de l'ERP *IronSuite*.
+Ce projet académique à long terme simule une mission réelle pour l'entreprise **Iron4Software**, une TPE de 25 salariés éditrice de l'ERP *IronSuite*.
 * **Contexte :** Croissance rapide, infrastructure non sécurisée.
 * **Mission :** Audit, Durcissement (Hardening), Déploiement SOC (Splunk) et Gestion de Crise.
 
