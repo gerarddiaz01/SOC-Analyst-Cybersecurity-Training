@@ -20,13 +20,5 @@ Les connaissances sont organisées par domaines de compétence du référentiel 
 * **`/Web-Hacking`** : Compréhension des vulnérabilités Web (OWASP Top 10) dans une optique défensive.
 * **`/Tools-CheatSheets`** : Mémos techniques sur mes outils quotidiens (Nmap, Burp Suite, Splunk, etc.).
 
-## ⚠️ Politique "No Spoilers" (Intégrité Académique)
-
-Conformément aux règles des plateformes d'entraînement (comme TryHackMe ou HackTheBox) et à l'éthique du milieu :
-
-1.  **Aucun "Flag"** (réponse finale) n'est publié en clair.
-2.  Les mots de passe ou données sensibles des exercices sont masqués (`[REDACTED]`).
-3.  L'accent est mis sur le **cheminement intellectuel** et la **technique** plutôt que sur la solution brute.
-
 ---
 *Ces notes sont mises à jour continuellement au fil de ma progression.*
