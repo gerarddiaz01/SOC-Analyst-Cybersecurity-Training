@@ -102,7 +102,7 @@ La réponse JSON contient le token administrateur, une clé secrète interne et 
 
 Pour contrer les risques liés à la chaîne logistique, plusieurs mesures défensives s'imposent :
 
-1.  **Analyse de Composition Logicielle (SCA) :** Il est crucial d'utiliser des outils de SCA (comme OWASP Dependency-Check ou Snyk) dans les pipelines CI/CD pour scanner automatiquement les dépendances et identifier les librairies obsolètes (CVE connues) avant le déploiement.
+1.  **Analyse de Composition Logicielle (SCA) :** Il est crucial d'utiliser des outils de SCA (comme OWASP Dependency-Check ou Snyk) dans les pipelines CI/CD pour scanner automatiquement les dépendances et identifier les librairies obsolètes (CVE connues) avant le déploiement. Si le SOC ne gère pas la CI/CD, il doit en revanche être informé des nouvelles vulnérabilités (CVE) critiques publiées pour rechercher rétroactivement des traces d'exploitation dans les logs (Threat Hunting).
 2.  **Inventaire et SBOM :** Maintenir un inventaire à jour des composants logiciels (Software Bill of Materials - SBOM) permet de savoir rapidement si une application utilise une librairie compromise lorsqu'une vulnérabilité est rendue publique.
 3.  **Surveillance des Comportements Anormaux :** Côté SOC, une réponse HTTP contenant des clés explicites (`admin_token`, `internal_secret`) ou des payloads entrants atypiques (comme un simple mot-clé de debug dans un champ de données) doit déclencher une alerte DLP (Data Loss Prevention) ou WAF.
 
@@ -132,7 +132,7 @@ Puisque l'application est censée déchiffrer le document dans le navigateur, la
 En ouvrant ce fichier JavaScript, j'ai immédiatement repéré la section de configuration. Le développeur a commis l'erreur critique de laisser la clé symétrique et le mode de chiffrement en clair dans le code source accessible à tous.
 
 * **Clé (Secret Key) :** `"my-secret-key-16"`
-* **Algorithme :** AES (induit par la taille de clé 128 bits)
+* **Algorithme :** AES (induit par la taille de clé 128 bits -> 16 caractères x 8 bits = 128 bits)
 * **Mode :** `ECB` (Electronic Codebook - mode non sécurisé car il ne masque pas les motifs de données).
 
 ![Découverte de la clé codée en dur dans le JS](../images/OWASP/Captura%20de%20pantalla%202026-02-08%20160152.png)
