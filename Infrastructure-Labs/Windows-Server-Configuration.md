@@ -76,3 +76,14 @@ Par défaut, le pare-feu de Windows 11 bloque les requêtes ping entrantes, emp�
 
 ![Création de la GPO](images/gpo-allow-ping-config.png)
 *(Détail de la règle entrante autorisant le protocole ICMPv4)*
+
+### 🔧 Dépannage (Troubleshooting) : Visibilité Réseau
+Lors des tests, une asymétrie de connectivité a été détectée : les machines Linux (Ubuntu/Kali) ne pouvaient pas pinger les machines Windows, bien que l'inverse fonctionnait.
+
+* **Diagnostic :**
+    1. La GPO `GPO_Allow_Ping` était liée uniquement à l'OU *Postes de Travail* (excluant le Serveur).
+    2. Le profil de pare-feu Windows bloquait par défaut les IP hors-domaine (comme celles des Linux).
+* **Correction appliquée :**
+    * **Scope :** Déplacement du lien de la GPO à la racine du domaine (`ironcorp.local`) pour une application globale.
+    * **Règle :** Modification de la règle de pare-feu pour autoriser les profils **Domaine, Privé et Public** (permettant au trafic venant du LAN Linux d'être accepté).
+    * **Résultat :** Le ping est désormais fonctionnel dans les deux sens (bidirectionnel) sur tout le parc.
