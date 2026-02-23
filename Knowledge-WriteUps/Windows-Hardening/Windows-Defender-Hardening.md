@@ -1,4 +1,4 @@
-# Windows Hardening - Configuration du Microsoft Defender Antivirus
+# Windows Hardening - Durcissement du Microsoft Defender Antivirus via GPO
 
 **Environnement :** Lab virtuel de Windows Hardening sur Microsoft Defender Antivirus — Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
 
@@ -167,6 +167,11 @@ Je me suis ensuite rendu dans l'arborescence : `Configuration ordinateur > Modè
 
 # Implications pour un Analyste SOC
 Ce laboratoire met en lumière le fait qu'une configuration par défaut d'un système Windows n'est pas suffisante face aux menaces actuelles. Avec ma casquette Blue Team, le déploiement de ce durcissement par Stratégie de Groupe me permet de garantir que le système intercepte agressivement les menaces Zero-Day en s'appuyant sur le Cloud (MAPS et BAFS). De plus, en forçant la conservation des éléments en quarantaine, je sécurise la préservation des échantillons de malwares. Ces artefacts sont indispensables pour mon travail d'investigation numérique, me permettant d'analyser le code malveillant et d'affiner mes propres règles de détection. Cette approche purement défensive réduit considérablement la surface d'attaque et renforce le contrôle de l'environnement face aux compromissions.
+
+### Limites et perspectives d'architecture SOC :
+Protection contre les falsifications (Tamper Protection) : Bien que les GPO forcent la configuration, un malware ayant obtenu une élévation de privilèges (Administrateur ou SYSTEM) pourrait contourner ces règles en modifiant directement le registre. Ce durcissement doit donc impérativement être couplé à l'activation de la Tamper Protection de Microsoft, qui verrouille ces paramètres de sécurité contre toute altération locale.
+
+Visibilité et Centralisation (SIEM) : Le blocage local n'est que la première étape de la réponse à incident. Pour que le SOC puisse réagir, il est indispensable de configurer le Windows Event Forwarding (WEF) ou de déployer un agent de collecte (ex: Splunk Universal Forwarder) afin de remonter les journaux locaux vers le SIEM central, notamment l'Event ID 1116 (Détection de malware) ou l'Event ID 1117 (Action effectuée sur le malware).
 
 ---
 *Fin du rapport de Lab.*
