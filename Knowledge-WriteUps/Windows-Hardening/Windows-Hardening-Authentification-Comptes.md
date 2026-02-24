@@ -39,6 +39,7 @@ Ensuite, j'ai configuré la robustesse des mots de passe via le chemin : `Config
 ![](../images/Authentification-Comptes/4.png)
 
 * **Stratégie :** `Maximum password age`.
+
 ![](../images/Authentification-Comptes/5.png)
   * **Configuration :** 365 jours.
   * **Explications :** Un changement trop fréquent incite les utilisateurs à inscrire leurs mots de passe sur des post-it ou à utiliser des itérations prévisibles. Une rotation annuelle est un bon compromis pour un compte standard.
@@ -46,17 +47,20 @@ Ensuite, j'ai configuré la robustesse des mots de passe via le chemin : `Config
   ![](../images/Authentification-Comptes/6.png)
 
 * **Stratégie :** `Minimum password length`.
+
 ![](../images/Authentification-Comptes/7.png)
   * **Configuration :** 14 caractères.
   * **Explications :** La longueur est notre meilleure arme contre le cassage de condensats (hash). 14 caractères rendent les attaques par force brute mathématiquement inefficaces.
 ![](../images/Authentification-Comptes/8.png)
 
 * **Stratégie :** `Password must meet complexity requirements`.
+
 ![](../images/Authentification-Comptes/9.png)
   * **Configuration :** Activé.
   * **Explications :** J'oblige l'utilisation d'au moins 3 types de caractères (majuscules, minuscules, chiffres, spéciaux) et j'interdis l'intégration du nom d'utilisateur dans le mot de passe.
 
 * **Stratégie :** `Store passwords using reversible encryption`.
+
 ![](../images/Authentification-Comptes/10.png)
   * **Configuration :** Désactivé.
   * **Explications :** Le chiffrement réversible équivaut à un stockage en clair. C'est une vulnérabilité critique que je désactive impérativement.
@@ -65,6 +69,7 @@ Pour finaliser cette partie, je me suis rendu dans `Configuration ordinateur > P
 ![](../images/Authentification-Comptes/11.png)
 
 * **Stratégie :** `Accounts: Limit local account use of blank passwords to console logon only`.
+
 ![](../images/Authentification-Comptes/12.png)
   * **Configuration :** Activé.
   * **Explications :** Les comptes sans mot de passe ne pourront s'authentifier que physiquement sur la machine, bloquant tout accès réseau non autorisé.
@@ -80,20 +85,24 @@ Chemin : `Configuration ordinateur > Modèles d'administration > Panneau de conf
 ![](../images/Authentification-Comptes/13.png)
 
 * **Stratégie :** `Prevent enabling lock screen camera`.
+
 ![](../images/Authentification-Comptes/14.png)
   * **Configuration :** Activé (Désactive l'accès caméra depuis l'écran de verrouillage).
 
 * **Stratégie :** `Prevent enabling lock screen slide show`.
+
 ![](../images/Authentification-Comptes/15.png)
   * **Configuration :** Activé (Désactive le diaporama pour éviter la fuite visuelle d'informations).
 
 Chemin : `Configuration ordinateur > Modèles d'administration > Système > Ouverture de session`.
 
 * **Stratégie :** `Allow users to select when a password is required when resuming from connected standby`.
+
 ![](../images/Authentification-Comptes/16.png)
   * **Configuration :** Désactivé.
 
 * **Stratégie :** `Turn off app notifications on the lock screen`.
+
 ![](../images/Authentification-Comptes/17.png)
   * **Configuration :** Activé.
   * **Explications :** J'empêche l'affichage de notifications qui pourraient divulguer des données professionnelles ou des emails à une personne regardant l'écran verrouillé.
@@ -102,6 +111,7 @@ Chemin : `Configuration ordinateur > Modèles d'administration > Composants Wind
 
 
 * **Stratégie :** `Show lock in the user tile menu`.
+
 ![](../images/Authentification-Comptes/18.png)
   * **Configuration :** Activé.
 
@@ -109,6 +119,7 @@ Chemin : `Configuration ordinateur > Modèles d'administration > Composants Wind
 
 
 * **Stratégie :** `Allow Windows Ink Workspace`.
+
 ![](../images/Authentification-Comptes/19.png)
   * **Configuration :** Désactivé (ou autorisé uniquement si déverrouillé).
 
@@ -120,6 +131,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 
 * **Stratégie :** `Interactive logon: Machine inactivity limit`.
+
 ![](../images/Authentification-Comptes/22.png)
   * **Configuration :** 900 secondes (15 minutes).
   ![](../images/Authentification-Comptes/23.png)
@@ -130,14 +142,17 @@ Chemin : `Configuration utilisateur > Modèles d'administration > Panneau de con
 ![](../images/Authentification-Comptes/24.png)
 
 * **Stratégie :** `Enable screen saver`.
+
 ![](../images/Authentification-Comptes/25.png)
   * **Configuration :** Activé.
 
 * **Stratégie :** `Password protect the screen saver`.
+
 ![](../images/Authentification-Comptes/26.png)
   * **Configuration :** Activé (Impose la saisie du mot de passe au retour).
 
 * **Stratégie :** `Screen saver timeout`.
+
 ![](../images/Authentification-Comptes/27.png)
   * **Configuration :** 900 secondes.
   ![](../images/Authentification-Comptes/28.png)
@@ -147,12 +162,14 @@ Chemin : `Configuration utilisateur > Modèles d'administration > Menu Démarrer
 ![](../images/Authentification-Comptes/29.png)
 
 * **Stratégie :** `Turn off toast notifications on the lock screen`.
+
 ![](../images/Authentification-Comptes/30.png)
   * **Configuration :** Activé.
 
 Chemin : `Configuration utilisateur > Modèles d'administration > Composants Windows > Contenu Cloud`.
 
 * **Stratégie :** `Do not suggest third-party content in Windows spotlight`.
+
 ![](../images/Authentification-Comptes/31.png)
   * **Configuration :** Activé.
 
@@ -166,6 +183,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 ![](../images/Authentification-Comptes/32.png)
 
 * **Stratégie :** `Account lockout threshold`.
+
 ![](../images/Authentification-Comptes/33.png)
   * **Configuration :** 5 tentatives.
 ![](../images/Authentification-Comptes/34.png)
@@ -173,12 +191,14 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 
 * **Stratégie :** `Account lockout duration`.
+
 ![](../images/Authentification-Comptes/35.png)
   * **Configuration :** 0 minute.
   ![](../images/Authentification-Comptes/36.png)
   * **Explications :** La valeur "0" indique que le compte restera verrouillé définitivement jusqu'à l'intervention d'un administrateur.
 
 * **Stratégie :** `Reset account lockout counter after`.
+
 ![](../images/Authentification-Comptes/37.png)
   * **Configuration :** 15 minutes.
 ![](../images/Authentification-Comptes/38.png)
@@ -193,12 +213,14 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 ![](../images/Authentification-Comptes/39.png)
 
 * **Stratégie :** `Interactive logon: Number of previous logons to cache`.
+
 ![](../images/Authentification-Comptes/40.png)
   * **Configuration :** 1 ou 2.
   ![](../images/Authentification-Comptes/41.png)
   * **Explications :** En limitant le cache aux toutes dernières connexions, je réduis l'impact d'une compromission de la base SAM locale.
 
 * **Stratégie :** `Network access: Do not allow storage of passwords and credentials for network authentication`.
+
 ![](../images/Authentification-Comptes/42.png)
   * **Configuration :** Activé.
 
@@ -226,6 +248,7 @@ Le chemin `Configuration ordinateur > Modèles d'administration > MS Security Gu
 ![](../images/Authentification-Comptes/49.png)
 
 * **Stratégie :** `WDigest Authentication`.
+
 ![](../images/Authentification-Comptes/50.png)
   * **Configuration :** Désactivé.
 
@@ -233,6 +256,7 @@ Le chemin `Configuration ordinateur > Modèles d'administration > MS Security Gu
 Chemin : `Configuration ordinateur > Modèles d'administration > Système > Device Guard`.
 
 * **Stratégie :** `Turn On Virtualization Based Security`.
+
 ![](../images/Authentification-Comptes/51.png)
   * **Configuration :** Activé.
   * **Explications :** J'applique des protections de mémoire en mode noyau pour sécuriser le processus LSASS.
@@ -246,29 +270,35 @@ Chemin : `Configuration ordinateur > Modèles d'administration > Système > Devi
 Chemin : `Configuration ordinateur > Modèles d'administration > Système > Ouverture de session`.
 
 * **Stratégie :** `Do not display network selection UI`.
+
 ![](../images/Authentification-Comptes/53.png)
   * **Configuration :** Activé.
 
 * **Stratégie :** `Enumerate local users on domain-joined computers`.
+
 ![](../images/Authentification-Comptes/54.png)
   * **Configuration :** Désactivé.
 
 Chemin : `Configuration ordinateur > Modèles d'administration > Composants Windows > Credential User Interface`.
 
 * **Stratégie :** `Do not display the password reveal button`.
+
 ![](../images/Authentification-Comptes/55.png)
   * **Configuration :** Activé (Désactive l'icône de l'œil).
 
 * **Stratégie :** `Enumerate administrator accounts on elevation`.
+
 ![](../images/Authentification-Comptes/56.png)
   * **Configuration :** Désactivé.
   * **Explications :** Lors d'une demande UAC, le nom de l'administrateur n'est plus proposé par défaut. L'attaquant doit le deviner.
 
 * **Stratégie :** `Require trusted path for credential entry`.
+
 ![](../images/Authentification-Comptes/57.png)
   * **Configuration :** Activé.
 
 * **Stratégie :** `Prevent the use of security questions for local accounts`.
+
 ![](../images/Authentification-Comptes/58.png)
   * **Configuration :** Activé.
   * **Explications :** Les réponses de sécurité sont facilement repérables via des recherches en sources ouvertes (OSINT).
@@ -276,16 +306,19 @@ Chemin : `Configuration ordinateur > Modèles d'administration > Composants Wind
 Chemin : `Configuration ordinateur > Modèles d'administration > Composants Windows > Options d'ouverture de session Windows`.
 
 * **Stratégie :** `Disable or enable software Secure Attention Sequence`.
+
 ![](../images/Authentification-Comptes/59.png)
   * **Configuration :** Désactivé.
 
 * **Stratégie :** `Sign-in last interactive user automatically after a system-initiated restart`.
+
 ![](../images/Authentification-Comptes/61.png)
   * **Configuration :** Désactivé.
 
 Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécurité > Stratégies locales > Options de sécurité`.
 
 * **Stratégie :** `Interactive logon: Do not require CTRL+ALT+DEL`.
+
 ![](../images/Authentification-Comptes/62.png)
   * **Configuration :** Désactivé.
   * **Explications :** En désactivant cette exception, j'oblige l'utilisateur à effectuer Ctrl+Alt+Suppr, garantissant qu'il interagit avec l'invite d'authentification authentique de l'OS et non avec un programme de spoofing.
@@ -298,28 +331,34 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 Chemin : `Configuration ordinateur > Modèles d'administration > Réseau > Station de travail Lanman`.
 
 * **Stratégie :** `Enable insecure guest logons`.
+
 ![](../images/Authentification-Comptes/63.png)
   * **Configuration :** Désactivé.
 
 Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécurité > Stratégies locales > Options de sécurité`.
 
 * **Stratégie :** `Network access: Allow anonymous SID/Name translation`.
+
 ![](../images/Authentification-Comptes/64.png)
   * **Configuration :** Désactivé.
 
 * **Stratégie :** `Network access: Do not allow anonymous enumeration of SAM accounts`.
+
 ![](../images/Authentification-Comptes/65.png)
   * **Configuration :** Activé.
 
 * **Stratégie :** `Network access: Let Everyone permissions apply to anonymous users`.
+
 ![](../images/Authentification-Comptes/67.png)
   * **Configuration :** Désactivé.
 
 * **Stratégie :** `Network access: Restrict anonymous access to Named Pipes and Shares`.
+
 ![](../images/Authentification-Comptes/68.png)
   * **Configuration :** Activé.
 
 * **Stratégie :** `Network access: Restrict clients allowed to make remote calls to SAM`.
+
 ![](../images/Authentification-Comptes/69.png)
   * **Configuration :** Restreindre la sécurité.
 
@@ -330,21 +369,25 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 ![](../images/Authentification-Comptes/72.png)
 
 * **Stratégie :** `Network security: Allow Local System to use computer identity for NTLM`.
+
 ![](../images/Authentification-Comptes/73.png)
   * **Configuration :** Activé.
 
 * **Stratégie :** `Network security: Allow LocalSystem NULL session fallback`.
+
 ![](../images/Authentification-Comptes/74.png)
   * **Configuration :** Désactivé.
 
 Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécurité > Stratégies locales > Attribution des droits utilisateur`.
 
 * **Stratégie :** `Access this computer from the network`.
+
 ![](../images/Authentification-Comptes/75.png)
   * **Configuration :** Ne conserver que les groupes/utilisateurs strictement nécessaires.
   ![](../images/Authentification-Comptes/76.png)
 
 * **Stratégie :** `Deny access to this computer from the network`.
+
 ![](../images/Authentification-Comptes/77.png)
   * **Configuration :** Ajouter explicitement les comptes locaux qui ne doivent faire l'objet d'aucun accès réseau distant.
   ![](../images/Authentification-Comptes/78.png)
@@ -357,6 +400,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécurité > Stratégies locales > Options de sécurité`.
 
 * **Stratégie :** `Network security: Do not store LAN Manager hash value on next password change`.
+
 ![](../images/Authentification-Comptes/79.png)
   * **Configuration :** Activé.
   * **Explications :** Enlève la capacité de Windows à générer des hash LM. L'utilisateur devra changer son mot de passe actuel pour que cette règle d'hygiène devienne effective et purge l'ancien hash LM du système.
