@@ -51,6 +51,7 @@ Ensuite, j'ai configuré la robustesse des mots de passe via le chemin : `Config
 ![](../images/Authentification-Comptes/7.png)
   * **Configuration :** 14 caractères.
   * **Explications :** La longueur est notre meilleure arme contre le cassage de condensats (hash). 14 caractères rendent les attaques par force brute mathématiquement inefficaces.
+
 ![](../images/Authentification-Comptes/8.png)
 
 * **Stratégie :** `Password must meet complexity requirements`.
@@ -66,6 +67,7 @@ Ensuite, j'ai configuré la robustesse des mots de passe via le chemin : `Config
   * **Explications :** Le chiffrement réversible équivaut à un stockage en clair. C'est une vulnérabilité critique que je désactive impérativement.
 
 Pour finaliser cette partie, je me suis rendu dans `Configuration ordinateur > Paramètres Windows > Paramètres de sécurité > Stratégies locales > Options de sécurité`.
+
 ![](../images/Authentification-Comptes/11.png)
 
 * **Stratégie :** `Accounts: Limit local account use of blank passwords to console logon only`.
@@ -134,6 +136,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 ![](../images/Authentification-Comptes/22.png)
   * **Configuration :** 900 secondes (15 minutes).
+
   ![](../images/Authentification-Comptes/23.png)
   * **Explications :** Définit le seuil d'inactivité avant le déclenchement de l'écran de veille et le verrouillage de la session.
 
@@ -155,6 +158,7 @@ Chemin : `Configuration utilisateur > Modèles d'administration > Panneau de con
 
 ![](../images/Authentification-Comptes/27.png)
   * **Configuration :** 900 secondes.
+
   ![](../images/Authentification-Comptes/28.png)
 
 Chemin : `Configuration utilisateur > Modèles d'administration > Menu Démarrer et barre des tâches > Notifications`.
@@ -186,6 +190,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 ![](../images/Authentification-Comptes/33.png)
   * **Configuration :** 5 tentatives.
+
 ![](../images/Authentification-Comptes/34.png)
   * **Explications :** Un seuil à 5 permet d'absorber les erreurs de frappe légitimes de l'utilisateur tout en bloquant rapidement les scripts malveillants.
 
@@ -194,6 +199,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 ![](../images/Authentification-Comptes/35.png)
   * **Configuration :** 0 minute.
+
   ![](../images/Authentification-Comptes/36.png)
   * **Explications :** La valeur "0" indique que le compte restera verrouillé définitivement jusqu'à l'intervention d'un administrateur.
 
@@ -216,6 +222,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 ![](../images/Authentification-Comptes/40.png)
   * **Configuration :** 1 ou 2.
+
   ![](../images/Authentification-Comptes/41.png)
   * **Explications :** En limitant le cache aux toutes dernières connexions, je réduis l'impact d'une compromission de la base SAM locale.
 
@@ -226,9 +233,11 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 **Désactivation de WDigest et intégration de Credential Guard :**
 Pour désactiver WDigest (qui stocke les mots de passe en clair dans la mémoire), j'ai dû télécharger les modèles d'administration SecGuide depuis le site de Microsoft.
+
 ![](../images/Authentification-Comptes/43.png)
 
 Sélection de la version adaptée et le télécharger.
+
 ![](../images/Authentification-Comptes/44.png)
 
 Décompression de l'archive.
@@ -236,15 +245,19 @@ Décompression de l'archive.
 ![](../images/Authentification-Comptes/45.png)
 
 Navigation vers le dossier "Templates".
+
 ![](../images/Authentification-Comptes/46.png)
 
 Copie du fichier SecGuide.admx dans le répertoire `%SystemRoot%\PolicyDefinitions`.
+
 ![](../images/Authentification-Comptes/47.png)
 
 Copie du fichier SecGuide.adml dans le répertoire `%SystemRoot%\PolicyDefinitions\en-Us`.
+
 ![](../images/Authentification-Comptes/48.png)
 
 Le chemin `Configuration ordinateur > Modèles d'administration > MS Security Guide` est maintenant disponible.
+
 ![](../images/Authentification-Comptes/49.png)
 
 * **Stratégie :** `WDigest Authentication`.
@@ -260,6 +273,7 @@ Chemin : `Configuration ordinateur > Modèles d'administration > Système > Devi
 ![](../images/Authentification-Comptes/51.png)
   * **Configuration :** Activé.
   * **Explications :** J'applique des protections de mémoire en mode noyau pour sécuriser le processus LSASS.
+
   ![](../images/Authentification-Comptes/52.png)
 
 ## 5. Saisie des Identifiants
@@ -363,9 +377,12 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
   * **Configuration :** Restreindre la sécurité.
 
     Sélectionner "Modifier la sécurité"
+
 ![](../images/Authentification-Comptes/70.png)
     Application des paramètres.
+
 ![](../images/Authentification-Comptes/71.png)
+
 ![](../images/Authentification-Comptes/72.png)
 
 * **Stratégie :** `Network security: Allow Local System to use computer identity for NTLM`.
@@ -384,12 +401,14 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 ![](../images/Authentification-Comptes/75.png)
   * **Configuration :** Ne conserver que les groupes/utilisateurs strictement nécessaires.
+
   ![](../images/Authentification-Comptes/76.png)
 
 * **Stratégie :** `Deny access to this computer from the network`.
 
 ![](../images/Authentification-Comptes/77.png)
   * **Configuration :** Ajouter explicitement les comptes locaux qui ne doivent faire l'objet d'aucun accès réseau distant.
+  
   ![](../images/Authentification-Comptes/78.png)
 
 ## 7. Hachage LM
