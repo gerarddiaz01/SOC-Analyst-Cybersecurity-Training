@@ -23,11 +23,13 @@ J'ai commencé par ouvrir l'éditeur de stratégie locale.
 Je me suis rendu dans le chemin : `Configuration ordinateur > Modèles d'administration > Système > Ouverture de session`.
 
 * **Stratégie :** Désactiver la connexion par mot de passe image.
+
 ![](../images/Authentification-Comptes/2.png)
   * **Configuration :** Activé.
   * **Explications :** Les schémas visuels sont prévisibles, peu complexes et extrêmement vulnérables à la surveillance physique (shoulder surfing). Je force son interdiction.
 
 * **Stratégie :** `Turn on convenience PIN sign-in`.
+
 ![](../images/Authentification-Comptes/3.png)
   * **Configuration :** Désactivé.
   * **Explications :** J'empêche l'utilisation d'un simple code PIN, souvent trop court et sujet aux attaques par dictionnaire, pour l'authentification au domaine.
