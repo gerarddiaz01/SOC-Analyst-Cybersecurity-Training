@@ -1,4 +1,4 @@
-# Windows Hardening - Durcissement du Microsoft Defender Antivirus via GPO
+# Hardening du Microsoft Defender Antivirus via GPO
 
 **Environnement :** Lab virtuel de Windows Hardening sur Microsoft Defender Antivirus — Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
 
