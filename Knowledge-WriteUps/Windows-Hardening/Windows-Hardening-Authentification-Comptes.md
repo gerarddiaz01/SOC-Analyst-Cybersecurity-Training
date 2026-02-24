@@ -207,6 +207,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 ![](../images/Authentification-Comptes/37.png)
   * **Configuration :** 15 minutes.
+  
 ![](../images/Authentification-Comptes/38.png)
 
 ## 4. Mise en Cache des Informations d'Identification
@@ -408,7 +409,7 @@ Chemin : `Configuration ordinateur > Paramètres Windows > Paramètres de sécur
 
 ![](../images/Authentification-Comptes/77.png)
   * **Configuration :** Ajouter explicitement les comptes locaux qui ne doivent faire l'objet d'aucun accès réseau distant.
-  
+
   ![](../images/Authentification-Comptes/78.png)
 
 ## 7. Hachage LM
