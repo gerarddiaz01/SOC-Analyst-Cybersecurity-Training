@@ -32,11 +32,14 @@ To maintain a standardized response, I followed a strict triage playbook:
 
 #### **Investigation:**
 
-I started by reviewing the firewall logs in Splunk. 
+I started by reviewing the firewall logs in Splunk.
+```
+index=firewall src_ip="10.20.2.17" dest_ip="67.199.248.11" dest_port=80
+```
 
 ![](../images//soc_simulator_1/2.png)
 
-I identified that the Source IP 10.20.2.17 (belonging to employee Hannah Harris) attempted to connect to Destination IP ```67.199.248.11``` on port ```80```. The requested URL was a shortened link (```http://bit.ly/3sHkX3da12340```). I submitted this URL to the TryDetectThis app, which confirmed its status as malicious. 
+I identified that the Source IP ```10.20.2.17``` (belonging to employee Hannah Harris) attempted to connect to Destination IP ```67.199.248.11``` on port ```80```. The requested URL was a shortened link (```http://bit.ly/3sHkX3da12340```). I submitted this URL to the TryDetectThis app, which confirmed its status as malicious. 
 
 ![](../images//soc_simulator_1/3.png)
 The Splunk logs confirmed the action was "blocked" by the "Blocked Websites" rule.
@@ -63,8 +66,10 @@ The SOC Simulator AI noted that while my report was accurate, it could be improv
 
 #### **Investigation:**
 
-I analyzed the email logs for the message sent from ```onboarding@hrconnex```.thm to ```j.garcia@thetrydaily.thm``` (Julia Garcia) with the subject "Action Required: Finalize Your Onboarding Profile". 
-
+I analyzed the email logs for the message sent from ```onboarding@hrconnex```.thm to ```j.garcia@thetrydaily.thm``` (Julia Garcia) with the subject "Action Required: Finalize Your Onboarding Profile".
+```
+index=email sender="onboarding@hrconnex.thm" recipient="j.garcia@thetrydaily.thm"
+```
 ![](../images//soc_simulator_1/5.png)
 
 I extracted the sender domain and the embedded link (```https://hrconnex.thm/onboarding/15400654060/j.garcia```) and analyzed both in the TryDetectThis app.
@@ -95,7 +100,10 @@ This activity is classified as a False Positive. I detected that at 11:16 on 02/
 #### **Investigation:**
 
 I reviewed the email sent from ```urgents@amazon.biz``` to ```h.harris@thetrydaily.thm``` (Hannah Harris) in Splunk.
-
+```
+1. index=email sender="urgents@amazon.biz" recipient="h.harris@thetrydaily.thm"
+2. index=firewall src_ip="10.20.2.17" dest_ip="67.199.248.11" action="blocked"
+```
 ![](../images//soc_simulator_1/10.png)
 
 While the sender email returned as clean in the threat intel app, the embedded shortened URL (```http://bit.ly/3sHkX3da12340```) was flagged as malicious. 
@@ -128,8 +136,11 @@ The AI validated my correlation of the email and firewall logs. It suggested a m
 ![](../images//soc_simulator_1/13.png)
 
 **Investigation:**
-I investigated the email sent from ```no-reply@m1crosoftsupport.co``` (a clear typosquatting attempt) to ```c.allen@thetrydaily.thm``` (Charlotte Allen) on Splunk. 
-
+I investigated the email sent from ```no-reply@m1crosoftsupport.co``` (a clear typosquatting attempt) to ```c.allen@thetrydaily.thm``` (Charlotte Allen) on Splunk.
+```
+1. index=email sender="no-reply@m1crosoftsupport.co" recipient="c.allen@thetrydaily.thm"
+2. index=firewall src_ip="10.20.2.25" dest_ip="45.148.10.131" dest_port=443
+```
 ![](../images//soc_simulator_1/14.png)
 
 The embedded link (```https://m1crosoftsupport.co/login```) was analyzed in TryDetectThis and confirmed as malicious. 
