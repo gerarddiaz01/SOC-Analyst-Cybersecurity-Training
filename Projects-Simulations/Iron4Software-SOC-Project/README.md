@@ -10,60 +10,64 @@ Ce projet académique à long terme simule une mission réelle pour l'entreprise
 * **Mission :** Audit, Durcissement (Hardening), Déploiement SOC (Splunk) et Gestion de Crise.
 
 ## Architecture du Lab (État Actuel)
-L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **pfSense**.
+L'infrastructure est virtualisée sur un hyperviseur **Proxmox VE**. Le réseau est segmenté via une passerelle **pfSense**.
 
 | Machine | OS & Rôle | Statut |
 | :--- | :--- | :--- |
-| **Firewall** | **PfSense** (Gateway, VPN, DNS) | ✅ Déployé |
-| **Attaquant** | **Kali Linux** (Red Team Ops) | ✅ Déployé |
-| **Victime 1** | **Windows 11 Enterprise** (Client) | ✅ Déployé |
-| **Victime 2** | **Ubuntu Desktop** (Serveur Web/App) | ✅ Déployé |
-| **AD Server** | **Windows Server 2019** (Active Directory) | ✅ Déployé |
-| **SIEM** | **Splunk Enterprise** (Log Management) | ⏳ À faire |
+| **pfSense-Gateway** | **pfSense** (Firewall, NAT, DNS) | ✅ Déployé |
+| **Kali-Attaquant** | **Kali Linux** (Red Team Ops / Attaquant externe) | ✅ Déployé |
+| **Win10-Client** | **Windows 10** (Poste Administrateur) | ✅ Déployé |
+| **Ubuntu-Web** | **Ubuntu** (Serveur Web Apache/PHP) | ✅ Déployé |
+| **WS2019-AD** | **Windows Server 2019** (Active Directory) | ✅ Déployé |
+| **Ubuntu-Splunk** | **Ubuntu** (SIEM - Splunk Enterprise) | ⏳ En attente |
 
 ## Roadmap & Progression (Cycle de vie SOC)
 
 ### Phase 1 : Infrastructure & Exposition [En Cours]
 *Objectif : Construire une infrastructure vulnérable (Bad configuration by design).*
-- [x] Installation de l'hyperviseur et segmentation réseau (PfSense).
-- [x] Déploiement des postes clients (Windows 11, Ubuntu).
-- [x] Déploiement de la machine attaquante (Kali).
+- [x] Installation de l'hyperviseur (Proxmox) et segmentation réseau (pfSense).
 - [x] Installation du Contrôleur de Domaine (Windows Server 2019).
-- [ ] Exposition volontaire de services (HTTP, SSH, RDP).
-- [ ] **Livrable :** Cartographie + Preuve d'exposition.
+- [x] Déploiement du poste client (Windows 10) et du serveur web (Ubuntu).
+- [x] Déploiement de la machine attaquante (Kali Linux) sur le sous-réseau public simulé.
+- [x] **Mise en place des vulnérabilités volontaires :**
+  - Mots de passe faibles/par défaut sur les services.
+  - Windows Server 2019 : Pare-feu désactivé et service RDP exposé.
+  - pfSense : Règle WAN *Allow All* et NAT (Port Forwarding) du port HTTP (80) vers le réseau interne.
+  - Serveur Web Ubuntu : Simulation d'une faille d'upload (MITRE T1190) avec un Webshell (`shell.php`) actif à la racine.
+- [ ] **Livrables :** Cartographie (Schéma réseau) + Preuve d'exposition (Scan Nmap).
 
 ### Phase 2 : Audit & Pentest Initial (Red Teaming)
-*Objectif : Identifier les failles avant correction.*
-- [ ] Scan de vulnérabilités (Nmap, Nessus).
-- [ ] Exécution d'attaques : Brute-force (Hydra), SQL Injection, XSS.
+*Objectif : Identifier et exploiter les failles avant correction.*
+- [ ] Scan de vulnérabilités et découverte du réseau (Nmap, Nessus).
+- [ ] Exécution d'attaques : Accès initial via Webshell, Mouvement latéral (RDP).
 - [ ] **Livrable :** Rapport d'audit initial (Findings & Preuves).
 
 ### Phase 3 : Durcissement (Blue Team - Hardening)
 *Objectif : Remédier aux failles découvertes.*
 - [ ] Mise en place de politiques de mots de passe (GPO) et MFA.
 - [ ] Durcissement OS & Fermeture des ports inutiles.
-- [ ] Sauvegardes chiffrées.
+- [ ] Mise en place de règles de pare-feu strictes.
 - [ ] **Livrable :** Rapport de configuration Avant/Après.
 
 ### Phase 4 : Détection & Supervision (Splunk)
 *Objectif : Voir l'invisible.*
-- [ ] Installation des Forwarders (Linux/Windows) vers Splunk.
+- [ ] Installation des Splunk Universal Forwarders (Linux/Windows).
 - [ ] Création de Dashboards (Authentification, Flux Réseaux).
 - [ ] **Règles de Détection (Alerts) :**
-    - [ ] Détection Brute-force SSH.
-    - [ ] Création de compte admin suspect.
+    - [ ] Détection de commandes suspectes sur le serveur Web.
+    - [ ] Création de compte admin suspect ou Brute-force.
     - [ ] Scan de ports interne.
 - [ ] **Livrable :** Rapport de surveillance (Captures + Règles).
 
 ### Phase 5 à 7 : Incident Response & Forensics
-- [ ] **Phase 5 (Re-Attaque) :** Vérification de l'efficacité des mesures.
+- [ ] **Phase 5 (Re-Attaque) :** Vérification de l'efficacité des mesures de détection.
 - [ ] **Phase 6 (IR) :** Simulation d'incident (Containment, Eradication, Recovery).
 - [ ] **Phase 7 (Forensics) :** Analyse post-mortem, Timeline, IOCs.
 - [ ] **Livrables :** Playbook IR + Rapport Forensique.
 
 ### Phase 8 : Management & REX
 - [ ] Communication de crise (Simulation direction/clients).
-- [ ] Rédaction du Mémoire Final (30 pages).
+- [ ] Rédaction du Mémoire Final.
 
 ---
 
@@ -71,9 +75,9 @@ L'infrastructure est déployée via VirtualBox. Le réseau est segmenté via **p
 
 Ce dépôt reflète la structure des livrables attendus par le jury :
 
-* **`/Evidence`** : Preuves techniques (Logs bruts, PCAP, Screenshots d'attaques).
+* **`/Evidence`** : Preuves techniques (Logs bruts, PCAP, Screenshots d'attaques, Scans Nmap).
 * **`/Reports`** : Les rapports PDF officiels (Audit, Hardening, Forensics).
-* **`/Configs`** : Fichiers de configuration (Règles Splunk SPL, Config PfSense, Scripts).
-* **`/Scripts`** : Outils d'automatisation Python/Bash développés pour le projet.
+* **`/Configs`** : Fichiers de configuration (Règles Splunk SPL, Config pfSense, Scripts YAML).
+* **`/Scripts`** : Outils d'automatisation développés pour le projet.
 
-> ⚠️ **Note :** Projet académique réalisé dans le cadre du Master Expert Cybersécurité.
+> ⚠️ **Note :** Projet académique réalisé dans le cadre du Master SOC Analyste Cybersécurité.
