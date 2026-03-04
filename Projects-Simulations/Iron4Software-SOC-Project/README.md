@@ -1,6 +1,6 @@
 # Projet Fil Rouge : Iron4Software SOC Implementation
 
-![Status](https://img.shields.io/badge/Status-Phase_1_En_Cours-orange?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Phase_2_En_Cours-orange?style=flat-square)
 ![Type](https://img.shields.io/badge/Type-Blue_Team_%26_Architecture-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Splunk_SIEM-000000?style=flat-square&logo=splunk)
 
@@ -19,11 +19,11 @@ L'infrastructure est virtualisée sur un hyperviseur **Proxmox VE**. Le réseau 
 | **Win10-Client** | **Windows 10** (Poste Administrateur) | ✅ Déployé |
 | **Ubuntu-Web** | **Ubuntu** (Serveur Web Apache/PHP) | ✅ Déployé |
 | **WS2019-AD** | **Windows Server 2019** (Active Directory) | ✅ Déployé |
-| **Ubuntu-Splunk** | **Ubuntu** (SIEM - Splunk Enterprise) | ⏳ En attente |
+| **Ubuntu-Splunk** | **Ubuntu** (SIEM - Splunk Enterprise) | ✅ Déployé |
 
 ## Roadmap & Progression (Cycle de vie SOC)
 
-### Phase 1 : Infrastructure & Exposition [En Cours]
+### Phase 1 : Infrastructure & Exposition [Fait]
 *Objectif : Construire une infrastructure vulnérable (Bad configuration by design).*
 - [x] Installation de l'hyperviseur (Proxmox) et segmentation réseau (pfSense).
 - [x] Installation du Contrôleur de Domaine (Windows Server 2019).
@@ -34,9 +34,9 @@ L'infrastructure est virtualisée sur un hyperviseur **Proxmox VE**. Le réseau 
   - Windows Server 2019 : Pare-feu désactivé et service RDP exposé.
   - pfSense : Règle WAN *Allow All* et NAT (Port Forwarding) du port HTTP (80) vers le réseau interne.
   - Serveur Web Ubuntu : Simulation d'une faille d'upload (MITRE T1190) avec un Webshell (`shell.php`) actif à la racine.
-- [ ] **Livrables :** Cartographie (Schéma réseau) + Preuve d'exposition (Scan Nmap).
+- [x] **Livrables :** Cartographie (Schéma réseau) + Preuve d'exposition (Scan Nmap).
 
-### Phase 2 : Audit & Pentest Initial (Red Teaming)
+### Phase 2 : Audit & Pentest Initial (Red Teaming) [En Cours]
 *Objectif : Identifier et exploiter les failles avant correction.*
 - [ ] Scan de vulnérabilités et découverte du réseau (Nmap, Nessus).
 - [ ] Exécution d'attaques : Accès initial via Webshell, Mouvement latéral (RDP).
