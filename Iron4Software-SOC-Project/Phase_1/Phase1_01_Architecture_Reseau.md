@@ -93,7 +93,7 @@ Pour les environnements Microsoft (Windows 10 et Windows Server 2019), j'ai priv
 
 ![](../Extras/Phase1/Architecture-Reseau/7.png)
 
-4. **Validation :** Après validation des fenêtres, un test de `ping` vers la passerelle dans l'invite de commande (cmd) a confirmé la bonne intégration du contrôleur de domaine dans le LAN.
+4. **Validation :** Après validation des fenêtres, un test de `ping` vers la passerelle dans l'invite de commande (cmd) a confirmé la bonne intégration du contrôleur de domaine (`WS2019-AD`) dans le LAN. J'ai répété cette opération de manière identique pour la machine `Win10-Client` avec l'IP `192.168.3.2/24`.
 
 ![](../Extras/Phase1/Architecture-Reseau/6.png)
 
