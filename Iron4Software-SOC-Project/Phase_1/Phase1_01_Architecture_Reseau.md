@@ -24,7 +24,7 @@ Cependant, pour les endpoints Windows (WS2019-AD, Win10-Client), j'ai modifié l
 
 ## 2. Cartographie Réseau et Segmentation
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/topologie.png)
+![](../Extras/Phase1/Architecture-Reseau/topologie.png)
 
 Pour simuler une attaque réaliste, l'architecture a été segmentée en deux zones via les bridges virtuels de Proxmox :
 
@@ -37,7 +37,7 @@ Dans la zone LAN, j'ai configuré l'intégralité des serveurs et du poste d'adm
 ## 3. Configuration du Cœur de Réseau : pfSense
 Le routeur pfSense-Gateway assure la frontière entre nos deux environnements.
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/24.png)
+![](../Extras/Phase1/Architecture-Reseau/24.png)
 
 Son interface WAN (em0) a été basculée en configuration DHCP. Ce choix pragmatique permet à Proxmox de lui fournir automatiquement une adresse valide (`192.168.50.7`) et la bonne passerelle de sortie vers le véritable Internet, étape indispensable pour le téléchargement et l'installation de nos futurs paquets applicatifs (Apache, Splunk).
 L'interface LAN (em1) a été assignée manuellement à l'adresse statique `192.168.3.253`, devenant ainsi le point de routage unique et contrôlé de notre infrastructure interne.
@@ -52,7 +52,7 @@ Sur les serveurs Ubuntu, la gestion du réseau passe par l'utilitaire `Netplan` 
 
 1. **Identification de l'interface :** J'ai d'abord identifié le nom logique de la carte réseau virtuelle (`enp6s18`) via la commande `ip a`.
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/8.png)
+![](../Extras/Phase1/Architecture-Reseau/8.png)
 
 2. **Édition de la configuration :** J'ai ouvert le fichier de configuration système avec les privilèges administrateur : `sudo nano /etc/netplan/50-cloud-init.yaml`.
 
@@ -72,13 +72,13 @@ Sur les serveurs Ubuntu, la gestion du réseau passe par l'utilitaire `Netplan` 
            addresses: [8.8.8.8, 192.168.3.253]
    ```
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/10.png)
+![](../Extras/Phase1/Architecture-Reseau/10.png)
 
 4. **Validation :** J'ai appliqué la configuration via `sudo netplan apply` puis validé la connectivité interne par un `ping 192.168.3.253`. J'ai répété cette opération de manière identique pour l'`Ubuntu-Splunk` avec l'IP `192.168.3.20/24`.
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/11.png)
+![](../Extras/Phase1/Architecture-Reseau/11.png)
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/12.png)
+![](../Extras/Phase1/Architecture-Reseau/12.png)
 
 ### Configuration Windows (Interface graphique) - Exemple sur WS2019-AD
 Pour les environnements Microsoft (Windows 10 et Windows Server 2019), j'ai privilégié l'accès direct aux adaptateurs réseau pour une configuration statique classique.
@@ -91,11 +91,11 @@ Pour les environnements Microsoft (Windows 10 et Windows Server 2019), j'ai priv
    - Passerelle par défaut : `192.168.3.253`
    - Serveurs DNS : `192.168.3.253` (Préféré) et `8.8.8.8` (Auxiliaire).
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/7.png)
+![](../Extras/Phase1/Architecture-Reseau/7.png)
 
 4. **Validation :** Après validation des fenêtres, un test de `ping` vers la passerelle dans l'invite de commande (cmd) a confirmé la bonne intégration du contrôleur de domaine dans le LAN.
 
-![](../../images/Iron4Software/Phase_1/Architecture-Réseau/6.png)
+![](../Extras/Phase1/Architecture-Reseau/6.png)
 
 **Contexte SOC & Blue Team : Le positionnement stratégique du SIEM :**
 La décision d'architecture la plus critique de cette phase concerne Splunk. Il aurait été techniquement possible (et économe en ressources) d'installer le serveur SIEM directement sur le serveur Web Ubuntu. J'ai volontairement rejeté cette approche au profit du déploiement d'une VM dédiée (`Ubuntu-Splunk` à l'IP `192.168.3.20`). 
