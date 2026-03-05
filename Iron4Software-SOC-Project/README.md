@@ -51,20 +51,17 @@ L'infrastructure est virtualisée sur un hyperviseur **Proxmox VE**. Le réseau 
   - Windows Server 2019 : Pare-feu désactivé et service RDP exposé.
   - pfSense : Règle WAN *Allow All* et NAT (Port Forwarding) du port HTTP (80) vers le réseau interne.
   - Serveur Web Ubuntu : Simulation d'une faille d'upload (MITRE T1190) avec un Webshell (`shell.php`) actif à la racine.
-- [x] **Livrables :** Cartographie (Schéma réseau) + Preuve d'exposition (Scan Nmap).
 
 ### Phase 2 : Audit & Pentest Initial (Red Teaming) [En Cours]
 *Objectif : Identifier et exploiter les failles avant correction.*
 - [ ] Scan de vulnérabilités et découverte du réseau (Nmap, Nessus).
 - [ ] Exécution d'attaques : Accès initial via Webshell, Mouvement latéral (RDP).
-- [ ] **Livrable :** Rapport d'audit initial (Findings & Preuves).
 
 ### Phase 3 : Durcissement (Blue Team - Hardening)
 *Objectif : Remédier aux failles découvertes.*
 - [ ] Mise en place de politiques de mots de passe (GPO) et MFA.
 - [ ] Durcissement OS & Fermeture des ports inutiles.
 - [ ] Mise en place de règles de pare-feu strictes.
-- [ ] **Livrable :** Rapport de configuration Avant/Après.
 
 ### Phase 4 : Détection & Supervision (Splunk)
 *Objectif : Voir l'invisible.*
@@ -74,17 +71,14 @@ L'infrastructure est virtualisée sur un hyperviseur **Proxmox VE**. Le réseau 
     - [ ] Détection de commandes suspectes sur le serveur Web.
     - [ ] Création de compte admin suspect ou Brute-force.
     - [ ] Scan de ports interne.
-- [ ] **Livrable :** Rapport de surveillance (Captures + Règles).
 
 ### Phase 5 à 7 : Incident Response & Forensics
 - [ ] **Phase 5 (Re-Attaque) :** Vérification de l'efficacité des mesures de détection.
 - [ ] **Phase 6 (IR) :** Simulation d'incident (Containment, Eradication, Recovery).
 - [ ] **Phase 7 (Forensics) :** Analyse post-mortem, Timeline, IOCs.
-- [ ] **Livrables :** Playbook IR + Rapport Forensique.
 
 ### Phase 8 : Management & REX
 - [ ] Communication de crise (Simulation direction/clients).
-- [ ] Rédaction du Mémoire Final.
 
 ---
 
