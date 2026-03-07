@@ -63,9 +63,16 @@ En prévision des techniques de post-exploitation et de mouvement latéral de la
 
 Cette configuration prépare le terrain pour la technique MITRE T1021.001. Si l'attaquant parvient à pivoter depuis le serveur Web vers le réseau LAN, le serveur Windows n'opposera aucune résistance réseau.
 
-3. **Attribution d'un mot de passe faible :** Le compte Administrateur du domaine a été configuré avec un mot de passe délibérément prédictible et vulnérable aux attaques par dictionnaire (`Admin123`), sans aucune politique de verrouillage de compte (Account Lockout Policy) en cas d'échecs multiples.
+3. **Affaiblissement de la politique d'authentification (Brute-force autorisé) :**
+Le compte Administrateur a été configuré avec un mot de passe délibérément prédictible (`Admin123`). Plus grave encore, j'ai désactivé la sécurité native contre les attaques par dictionnaire.
 
-*Contexte SOC & Blue Team :* L'ouverture du port RDP combinée à l'utilisation d'un mot de passe faible est le vecteur idéal pour un mouvement latéral. Savoir que l'attaquant devra forcer cette authentification me donne un avantage défensif majeur : lors de la Phase 4, je pourrai auditer les journaux de sécurité Windows via Splunk pour traquer la multiplication de l'Event ID 4625 (Échec d'ouverture de session) et ainsi créer une alerte de détection de brute-force en temps réel.
+- **Désactivation du seuil de verrouillage :** Dans la `Stratégie de sécurité locale` (secpol.msc), j'ai navigué vers *Stratégies de comptes > Stratégie de verrouillage du compte* et fixé le "Seuil de verrouillage du compte" à **0** (zéro).
+
+![](../Extras/Phase1/Creation-Vulnerabilités/14.png)
+
+*Justification Narrative (Le facteur humain) :* Cette modification simule une demande réelle et fréquente dans les PME. Le dirigeant de l'entreprise Iron4Software oubliant régulièrement ses identifiants, le service informatique a reçu l'ordre de désactiver le verrouillage automatique pour éviter que le compte de direction ne soit bloqué à chaque erreur de saisie. En privilégiant le confort à la sécurité, l'entreprise a ainsi ouvert la porte à un brute-force illimité et indétectable par le système lui-même.
+
+*Contexte SOC & Blue Team :* L'ouverture du port RDP combinée à l'absence de politique de verrouillage est le vecteur idéal pour un mouvement latéral. Savoir que l'attaquant peut tenter des milliers de combinaisons sans être banni me donne un avantage défensif majeur : lors de la Phase 4, je pourrai auditer les journaux de sécurité Windows via Splunk pour traquer la multiplication de l'Event ID 4625 (Échec d'ouverture de session) et ainsi créer une alerte de détection de brute-force basée sur la volumétrie anormale en temps réel.
 
 ## 4. Déploiement de l'Application Vulnérable et de la Backdoor (MITRE ATT&CK T1190)
 

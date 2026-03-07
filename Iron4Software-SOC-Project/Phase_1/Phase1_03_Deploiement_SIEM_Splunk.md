@@ -3,7 +3,7 @@
 **Environnement :** Home Lab virtuel sur Proxmox pour le projet Iron4Software — Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
 
 ## Objectif du Lab
-Une infrastructure, même durcie, est indéfendable si elle est aveugle. L'objectif de cette étape est de déployer le cœur analytique de notre SOC : le SIEM (Security Information and Event Management). Il s'agit d'installer le serveur central Splunk Enterprise ("Le Cerveau") dans une zone isolée, puis de déployer des agents de collecte (Universal Forwarders) sur nos serveurs cibles afin de centraliser la télémétrie système, réseau et applicative en temps réel.
+Une infrastructure, même durcie, est indéfendable si elle est aveugle. L'objectif de cette étape est de déployer le cœur analytique de notre SOC: le SIEM (Security Information and Event Management). Il s'agit d'installer le serveur central Splunk Enterprise ("Le Cerveau") dans une zone isolée, puis de déployer des agents de collecte (Universal Forwarders) sur nos serveurs cibles afin de centraliser la télémétrie système, réseau et applicative en temps réel.
 
 ## Outils et Technologies
 - **SIEM Central :** Splunk Enterprise 9.0.3.
