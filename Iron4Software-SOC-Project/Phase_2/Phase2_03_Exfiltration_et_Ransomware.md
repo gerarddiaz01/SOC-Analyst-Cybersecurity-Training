@@ -20,6 +20,7 @@ Depuis Kali Linux, je lance le client RDP :
 ```bash
 xfreerdp /v:192.168.3.10 /u:Administrateur /p:Admin123 /cert:ignore /dynamic-resolution
 ```
+
 ![](../Extras/Phase2/Exfiltration_et_Ransomware/2.png)
 
 ### Analyse "Sous le capot" :
