@@ -26,7 +26,7 @@ Voici le plan d'action tactique déployé à travers les 8 phases de ce projet :
 * **Phase 7 : Investigation Forensique.** Analyse approfondie à froid. Reconstitution de la timeline de l'attaque, extraction des Indicateurs de Compromission (IOC) et rédaction d'un rapport détaillant les TTPs (Tactiques, Techniques et Procédures).
 * **Phase 8 : Gestion et Communication de Crise.** Pilotage de l'impact organisationnel : communication stratégique à la direction, notification de violation de données (CNIL) et présentation du rapport post-mortem incluant la feuille de route sécuritaire.
 
-## Architecture du Lab (État Actuel)
+## Architecture du Lab (VMs)
 L'infrastructure est virtualisée sur un hyperviseur **Proxmox VE**. Le réseau est segmenté via une passerelle **pfSense**.
 
 | Machine | OS & Rôle | Statut |
@@ -54,8 +54,8 @@ L'infrastructure est virtualisée sur un hyperviseur **Proxmox VE**. Le réseau 
 
 ### Phase 2 : Audit & Pentest Initial (Red Teaming) [En Cours]
 *Objectif : Identifier et exploiter les failles avant correction.*
-- [ ] Scan de vulnérabilités et découverte du réseau (Nmap, Nessus).
-- [ ] Exécution d'attaques : Accès initial via Webshell, Mouvement latéral (RDP).
+- [x] Scan de vulnérabilités et découverte du réseau (Nmap, Nessus).
+- [x] Exécution d'attaques : Accès initial via Webshell, Mouvement latéral (RDP), Ransomware et Exfiltration.
 
 ### Phase 3 : Durcissement (Blue Team - Hardening)
 *Objectif : Remédier aux failles découvertes.*

@@ -3,7 +3,7 @@
 **Environnement :** Home Lab virtuel sur Proxmox pour le projet Iron4Software — Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
 
 ## Objectif du Lab
-Après avoir obtenu un accès initial sur la zone exposée (Serveur Web), l'objectif de l'attaquant est de s'étendre vers le cœur du réseau (Mouvement Latéral) pour compromettre la cible de haute valeur : le Contrôleur de Domaine Windows Server 2019. Cette étape vise à exploiter la permissivité du pare-feu interne et à forcer l'authentification du compte Administrateur (Credential Access). Sur le plan défensif, cette attaque frontale générera une volumétrie massive de journaux d'échecs d'authentification, matière première idéale pour la création de nos futures alertes SOC.
+Après avoir obtenu un accès initial sur la zone exposée (Serveur Web), l'objectif de l'attaquant est de s'étendre vers le cœur du réseau (Mouvement Latéral) pour compromettre la cible de haute valeur : le Contrôleur de Domaine Windows Server 2019. On appelle ça faire du *Pivoting* (Mitre Tactic TA0008). Cette étape vise à exploiter la permissivité du pare-feu interne et à forcer l'authentification du compte Administrateur (Credential Access). Sur le plan défensif, cette attaque frontale générera une volumétrie massive de journaux d'échecs d'authentification, matière première idéale pour la création de nos futures alertes SOC.
 
 ## Outils et Technologies
 - **Système d'attaque :** Kali Linux.

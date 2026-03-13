@@ -74,7 +74,7 @@ Le compte Administrateur a été configuré avec un mot de passe délibérément
 
 *Contexte SOC & Blue Team :* L'ouverture du port RDP combinée à l'absence de politique de verrouillage est le vecteur idéal pour un mouvement latéral. Savoir que l'attaquant peut tenter des milliers de combinaisons sans être banni me donne un avantage défensif majeur : lors de la Phase 4, je pourrai auditer les journaux de sécurité Windows via Splunk pour traquer la multiplication de l'Event ID 4625 (Échec d'ouverture de session) et ainsi créer une alerte de détection de brute-force basée sur la volumétrie anormale en temps réel.
 
-## 4. Déploiement de l'Application Vulnérable et de la Backdoor (MITRE ATT&CK T1190)
+## 4. Déploiement de l'Application Vulnérable et de la Backdoor pour obtenir de la persistence (MITRE ATT&CK T1190 et TA0003)
 
 L'étape finale consiste à déployer le service web et la vulnérabilité qui servira de point d'entrée initial (Initial Access). 
 

