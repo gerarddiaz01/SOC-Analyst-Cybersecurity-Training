@@ -1,9 +1,9 @@
 # Incident Report: Windows Task Scheduler Persistence Identified
 
-**Date:** 02-04-2026  
-**Investigator:** Gerard Diaz Gibert  
-**Environment:** TryHackMe - Alert Triage With Splunk - Virtual Lab  
-**Scenario:** Persistence via Malicious Scheduled Task  
+* **Date:** 02-04-2026  
+* **Investigator:** Gerard Diaz Gibert  
+* **Environment:** TryHackMe - Alert Triage With Splunk - Virtual Lab  
+* **Scenario:** Persistence via Malicious Scheduled Task  
 
 ---
 

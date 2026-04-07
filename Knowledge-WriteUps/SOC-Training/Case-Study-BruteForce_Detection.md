@@ -1,9 +1,9 @@
 # Incident Report: Linux Brute Force Activity Detection
 
-**Date:** 02-04-2026
-**Investigator:** Gerard Diaz Gibert
-**Environment:** TryHackMe - Alert Triage With Splunk - Virtual Lab
-**Scenario:** Initial Access & Privilege Escalation on Linux Host
+* **Date:** 02-04-2026
+* **Investigator:** Gerard Diaz Gibert
+* **Environment:** TryHackMe - Alert Triage With Splunk - Virtual Lab
+* **Scenario:** Initial Access & Privilege Escalation on Linux Host
 
 ---
 
