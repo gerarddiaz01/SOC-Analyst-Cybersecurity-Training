@@ -115,7 +115,29 @@ index=botsv1 imreallynotbatman.com sourcetype=stream*
 
 **Findings:** `40.80.148.42` generated 17,483 requests vs. `23.22.63.114` with 1,235. Two actors, two distinct roles — this is **Infrastructure Decoupling**: one IP for loud scanning, a second for targeted exploitation to avoid single-IP rate limiting.
 
-### 3.2 Isolating POST Traffic to the Admin Panel
+### 3.2 Narrowing it down to the compromised asset
+
+Now we will narrow down the result to show requests sent to our web server, which has the IP 192.168.250.70. The following query will look for all the inbound traffic towards our web server.
+
+**Query:**
+```splunk
+index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70"
+```
+
+The principle here is target isolation. An index like botsv1 might contain logs for the whole company. We only care about the victim. By filtering for the server IP, you remove all the "Inter-office" chatter. It turns a 70,000-event search into a focused investigation on the compromised asset.
+
+![](../images/SOC-Triage4/15.png)
+
+![](../images/SOC-Triage4/16.png)
+
+**Findings:**
+* The result in the src_ip field shows three IP addresses (1 local IP and two remote IPs) that originated the HTTP traffic towards our webserver.
+* Another interesting field, http_method, will give us information about the HTTP Methods observed during these HTTP communications.
+* We observed most of the requests coming to our server through the POST request.
+
+
+
+### 3.3 Isolating POST Traffic to the Admin Panel
 
 We filtered for POST requests to the server to separate active attack traffic from passive scanning.
 
@@ -124,7 +146,11 @@ We filtered for POST requests to the server to separate active attack traffic fr
 index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" http_method=POST
 ```
 
-![](../images/SOC-Triage4/15.png)
+![](../images/SOC-Triage4/17.png)
+
+![](../images/SOC-Triage4/19.png)
+
+![](../images/SOC-Triage4/20.png)
 
 **Findings:**
 * `40.80.148.42`: 12,844 POST events — `http_user_agent` is Mozilla/Chrome browser string, targeting `/joomla/index.php/component/search/`. This is the **Acunetix injection payload traffic**.
@@ -132,7 +158,7 @@ index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" http_method=POST
 
 The correlation is exact: 412 Python requests targeting the admin login = the brute force campaign. The math connects the infrastructure to the target.
 
-### 3.3 Extracting the Credential Attempts
+### 3.4 Extracting the Credential Attempts
 
 We drilled into the admin login traffic to expose the actual credentials being submitted.
 
@@ -144,11 +170,16 @@ form_data=*username*passwd*
 | table _time uri src_ip dest_ip form_data
 ```
 
-![](../images/SOC-Triage4/exploit_3.png)
+![](../images/SOC-Triage4/22.png)
 
 **Finding:** The `form_data` field shows a constant `username=admin` across all 413 events, with a rotating `passwd` value. Single username, dictionary password list — this is a targeted credential stuffing attack against the `admin` account.
 
-### 3.4 Extracting Passwords with Regex
+### 3.5 Extracting Passwords with Regex
+
+Looking into the logs, we see that these fields are not parsed properly. We will then use Regex in the search to extract only these two fields and their values from the logs and display them. This is data normalisation for triage, we are turning text into metrics.
+
+By adding `| rex field=form_data "passwd=(?<creds>\w+)"` to the query, we will extract the passwd values only. This will pick the form_data field and extract all the values found with the field `creds`.
+
 
 **Query:**
 ```splunk
@@ -158,7 +189,9 @@ http_method=POST form_data=*username*passwd*
 | table _time src_ip uri http_user_agent creds
 ```
 
-![](../images/SOC-Triage4/exploit_4.png)
+![](../images/SOC-Triage4/25.png)
+
+![](../images/SOC-Triage4/24.png)
 
 **Findings — The Tactical Shift:**
 
@@ -188,7 +221,7 @@ With admin access confirmed, we searched for any file uploads from the attacker'
 index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" *.exe
 ```
 
-![](../images/SOC-Triage4/install_1.png)
+![](../images/SOC-Triage4/27.png)
 
 **Finding:** The `part_filename{}` field — present in MIME multipart upload logs — shows two filenames: `3791.exe` and `agent.php`. This field confirms actual file transfer, not merely a URL reference.
 
@@ -199,11 +232,26 @@ index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" *.exe
 index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" "part_filename{}"="3791.exe"
 ```
 
-![](../images/SOC-Triage4/install_2.png)
+![](../images/SOC-Triage4/29.png)
 
 **Finding:** The `c_ip` field (client IP) shows `40.80.148.42` as the sole uploader — 100% of events. The same IP that logged into the admin panel delivered the binary.
 
-### 4.3 Confirming Execution via Sysmon (Host Pivot)
+### 4.4 Which sourcetype can we dig deep into?
+
+We need to narrow down our search query to show the logs from the host-centric log sources to answer this question. To do so we will use a rather wide query and watch out for the different sourcetypes to see which one we can dig deep into.
+
+**Query:**
+```splunk
+index=botsv1 "3791.exe"
+```
+
+![](../images/SOC-Triage4/30.png)
+
+**Findings:** We can clearly use `XmlWinEventLog` (Sysmon) as a sourcetype, since  more than 90% of the logs regarding the executable come from it. Sysmon's `EventCode=1` is specifically leveraged to find evidence of program execution.
+
+
+
+### 4.4 Confirming Execution via Sysmon (Host Pivot)
 
 Network logs prove the file arrived. To prove it ran, we pivot from `stream:http` to `XmlWinEventLog` (Sysmon) and look for **Event ID 1 — Process Creation**.
 
@@ -212,7 +260,11 @@ Network logs prove the file arrived. To prove it ran, we pivot from `stream:http
 index=botsv1 "3791.exe" sourcetype="XmlWinEventLog" EventCode=1
 ```
 
-![](../images/SOC-Triage4/install_3.png)
+![](../images/SOC-Triage4/31.png)
+
+![](../images/SOC-Triage4/34.png)
+
+![](../images/SOC-Triage4/33.png)
 
 **Findings from the Sysmon log:**
 * **`CommandLine`:** `cmd.exe /c "3791.exe >& amp;1"` — the file was launched via `cmd.exe`, meaning the attacker triggered shell execution through their Joomla admin access.
@@ -220,11 +272,15 @@ index=botsv1 "3791.exe" sourcetype="XmlWinEventLog" EventCode=1
 * **`MD5 Hash`:** `AAE3F5A29935E6ABCC2C2754D12A9AF0`
 * **`CurrentDirectory`:** `C:\inetpub\wwwroot\joomla\` — the file was staged in the web root.
 
-### 4.4 Threat Intel — VirusTotal Hash Lookup
+### 4.5 Threat Intel — VirusTotal Hash Lookup
 
-Cross-referencing the MD5 hash `AAE3F5A29935E6ABCC2C2754D12A9AF0` on VirusTotal:
+Sysmon also collects the Hash value of the processes being created, the MD5 HASH of the program 3791.exe is `AAE3F5A29935E6ABCC2C2754D12A9AF0`.
 
-![](../images/SOC-Triage4/install_4.png)
+![](../images/SOC-Triage4/32.png)
+
+Now we go to VirusTotal and we cross-reference it.
+
+![](../images/SOC-Triage4/35.png)
 
 **Finding:** 65/71 security vendors flagged this file as malicious. The alternate filename associated with this hash is **`ab.exe`** — commonly attributed to the **Poison Ivy / Fynloski Remote Access Trojan (RAT)** family. The random numeric name `3791.exe` was a deliberate masquerade to blend into temp file noise.
 
@@ -251,7 +307,7 @@ A web server should receive traffic, not originate it. We checked Suricata for o
 index=botsv1 src=192.168.250.70 sourcetype=suricata
 ```
 
-![](../images/SOC-Triage4/action_1.png)
+![](../images/SOC-Triage4/37.png)
 
 **Critical Finding:** The server `192.168.250.70` appears as the **source** of 12,601 events — communicating outbound to external IPs. The `dest_ip` breakdown shows heavy traffic to `40.80.148.42` (10,317 events, 81.8%) and `23.22.63.114` (1,294 events, 10.3%). A server initiating thousands of outbound connections to known attacker IPs is a confirmed indicator of compromise — the machine is no longer serving pages, it is **calling home**.
 
@@ -264,7 +320,7 @@ We pivoted to `dest_ip=23.22.63.114` to investigate the nature of the server's o
 index=botsv1 src=192.168.250.70 sourcetype=suricata dest_ip=23.22.63.114
 ```
 
-![](../images/SOC-Triage4/action_2.png)
+![](../images/SOC-Triage4/39.png)
 
 **Finding:** The `url` field shows 3 values: `/joomla/administrator/index.php` (1,235 hits), `/joomla/agent.php` (52 hits), and — critically — `/poisonivy-is-coming-for-you-batman.jpeg` (3 hits). A legitimate web developer does not name image files after their attack group. This is the defacement payload.
 
@@ -276,7 +332,7 @@ index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250
 | table _time src dest_ip http.hostname url
 ```
 
-![](../images/SOC-Triage4/action_3.png)
+![](../images/SOC-Triage4/40.png)
 
 **Finding:** The table output reveals the full picture. The server `192.168.250.70` fetched the defacement image via a `GET` request from `prankglassinebracket.jumpingcrab[.]com` (hosted at `23.22.63.114`). The server was commanded — through the installed RAT — to pull the attacker's image and place it on the web root.
 
@@ -287,7 +343,7 @@ index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250
 index=botsv1 sourcetype=fortigate_utm "poisonivy-is-coming-for-you-batman.jpeg"
 ```
 
-![](../images/SOC-Triage4/action_4.png)
+![](../images/SOC-Triage4/42.png)
 
 **Finding:** The Fortinet firewall logged the outbound request with `action=passthrough` and `catdesc="Malicious Websites"` — the firewall **detected** the category as malicious but was configured in **monitor mode**, not block mode. The connection was allowed through. This is a critical post-incident finding for the remediation phase.
 
@@ -311,9 +367,9 @@ The defacement investigation already surfaced the C2 hostname. We confirmed it v
 index=botsv1 sourcetype=fortigate_utm "poisonivy-is-coming-for-you-batman.jpeg"
 ```
 
-![](../images/SOC-Triage4/c2_1.png)
+![](../images/SOC-Triage4/43-1.png)
 
-**Finding:** The `url` field in the Fortinet logs shows the full FQDN: `prankglassinebracket.jumpingcrab[.]com:1337`. Port 1337 is non-standard and commonly used by RAT C2 infrastructure.
+**Finding:** The `url` field in the Fortinet logs shows the full FQDN: `prankglassinebracket.jumpingcrab.com:1337`. Port 1337 is non-standard and commonly used by RAT C2 infrastructure.
 
 **Corroborating via stream:http:**
 
@@ -323,7 +379,7 @@ index=botsv1 sourcetype=stream:http dest_ip=23.22.63.114
 "poisonivy-is-coming-for-you-batman.jpeg" src_ip=192.168.250.70
 ```
 
-![](../images/SOC-Triage4/c2_2.png)
+![](../images/SOC-Triage4/44.png)
 
 **Finding:** The `stream:http` log confirms the full conversation: `src_ip=192.168.250.70` (victim server) issued a `GET` request to `site=prankglassinebracket.jumpingcrab[.]com:1337` for `/poisonivy-is-coming-for-you-batman.jpeg`. This is the **Reverse Connection** — the compromised server calling out to the attacker's C2 to retrieve the defacement asset.
 
@@ -343,11 +399,9 @@ index=botsv1 sourcetype=stream:http dest_ip=23.22.63.114
 
 ### 7.1 C2 Domain Intelligence (Robtex)
 
-With the C2 domain `prankglassinebracket.jumpingcrab[.]com` confirmed, we pivoted to Robtex to enumerate the attacker's broader infrastructure.
+With the C2 domain `prankglassinebracket.jumpingcrab.com` confirmed, we pivoted to Robtex to enumerate the attacker's broader infrastructure.
 
 **Platform:** `robtex.com` — DNS lookup on `prankglassinebracket.jumpingcrab.com`
-
-![](../images/SOC-Triage4/weapon_1.png)
 
 **Findings:**
 * **IP Numbers associated:** `69.197.18.183`, `70.39.97.227`, `169.47.130.85`
@@ -357,8 +411,6 @@ With the C2 domain `prankglassinebracket.jumpingcrab[.]com` confirmed, we pivote
 ### 7.2 Attacker IP Intelligence (Robtex — `23.22.63.114`)
 
 **Platform:** `robtex.com` — IP lookup on `23.22.63.114`
-
-![](../images/SOC-Triage4/weapon_2.png)
 
 **Critical Finding:** This IP resolves to an Amazon EC2 instance (`ec2-23-22-63-114.compute-1.amazonaws.com`). More importantly, the **Shared** section reveals 8 hostnames pointing to this IP that are **typosquats of Wayne Enterprises' domain:**
 
@@ -370,13 +422,10 @@ These domains were pre-registered before the attack — a deliberate preparation
 
 **Platform:** `virustotal.com` — Relations tab for IP `23.22.63.114`
 
-![](../images/SOC-Triage4/weapon_3.png)
 
-**Finding:** The Relations tab surfaces the domain `www.po1s0n1vy[.]com` associated with this IP. This is the attacker's group domain — **P01s0n1vy APT**.
+**Finding:** The Relations tab surfaces the domain `www.po1s0n1vy.com` associated with this IP. This is the attacker's group domain — **P01s0n1vy APT**.
 
 **Platform:** `whois.domaintools.com` — Whois lookup for `po1s0n1vy.com`
-
-![](../images/SOC-Triage4/weapon_4.png)
 
 **Findings:**
 * **Registrar:** GoDaddy.com, LLC
@@ -388,13 +437,13 @@ These domains were pre-registered before the attack — a deliberate preparation
 
 Additional sibling domains found: `smtp.po1s0n1vy.com`, `ftp.po1s0n1vy.com`, `lilian.po1s0n1vy.com`, and crucially `prankglassinebracket.jumpingcrab.po1s0n1vy.com` — directly tying the C2 domain to the P01s0n1vy infrastructure.
 
-**Associated email (via AlienVault OTX):** `lillian.rose@po1s0n1vy[.]com`
+**Associated email (via AlienVault OTX):** `lillian.rose@po1s0n1vy.com`
 
 **Weaponization Summary:**
 * **Threat Actor:** P01s0n1vy APT Group
 * **C2 Infrastructure:** Amazon EC2 (`23.22.63.114`) with Dynamic DNS overlay
 * **Pre-staged Typosquat Domains:** 7 Wayne Enterprises lookalike domains registered prior to attack
-* **APT Email IOC:** `lillian.rose@po1s0n1vy[.]com`
+* **APT Email IOC:** `lillian.rose@po1s0n1vy.com`
 * **MITRE:** Acquire Infrastructure **(T1583)**, Stage Capabilities **(T1608)**
 
 ---
@@ -407,8 +456,6 @@ The threat intel report indicated P01s0n1vy maintains a secondary attack vector.
 
 **Platform:** `threatminer.org` — Host lookup for `23.22.63.114`
 
-![](../images/SOC-Triage4/delivery_1.png)
-
 **Finding:** Three file hashes are associated with this IP. One hash stands out with multiple AV detections: `c99131e0169171935c5ac32615ed6261`. Vendor labels include `Trojan.GenericKD.3470547`, `Trojan/Backdoor.Win32.Redsip`, `W32/Korplug.HP`, and `Backdoor.Redsip.f`.
 
 ### 8.2 Malware Metadata (VirusTotal + Hybrid-Analysis)
@@ -418,8 +465,6 @@ The threat intel report indicated P01s0n1vy maintains a secondary attack vector.
 **Finding:** The file metadata reveals the original filename: **`MirandaTateScreensaver.scr.exe`** — a `.scr` (screensaver) binary, a classic social engineering delivery disguise. **48/68 vendors** flag it as malicious.
 
 **Platform:** `hybrid-analysis.com` — Full behavioral analysis
-
-![](../images/SOC-Triage4/delivery_2.png)
 
 **Findings:**
 * **File:** `MirandaTateScreensaver.scr.exe` (483 KB, PE32 executable, WINDOWS)
@@ -442,13 +487,13 @@ The threat intel report indicated P01s0n1vy maintains a secondary attack vector.
 
 | Timestamp | Phase | Event |
 | :--- | :--- | :--- |
-| **Pre-attack** | Weaponization | P01s0n1vy registers 7 Wayne Enterprises typosquat domains on `23.22.63.114`. C2 infrastructure at `prankglassinebracket.jumpingcrab[.]com:1337` is pre-staged. |
+| **Pre-attack** | Weaponization | P01s0n1vy registers 7 Wayne Enterprises typosquat domains on `23.22.63.114`. C2 infrastructure at `prankglassinebracket.jumpingcrab.com:1337` is pre-staged. |
 | **~Aug 10, 2016** | Reconnaissance | `40.80.148.42` launches Acunetix vulnerability scan against `imreallynotbatman.com`. Suricata logs CVE-2014-6271 (Shellshock), SQLi, XSS, and XXE probes. Joomla CMS identified. Admin portal at `/joomla/administrator/index.php` located. |
 | **Aug 10 — 21:45** | Exploitation | `23.22.63.114` begins automated brute force via Python-urllib/2.7 script against `admin` account. 412 unique passwords attempted. |
 | **Aug 10 — 21:46** | Exploitation | Password `batman` discovered. `40.80.148.42` switches to Mozilla browser and manually authenticates to Joomla admin panel. Access granted. |
 | **Aug 10 — ~21:56** | Installation | `40.80.148.42` uploads `3791.exe` (Poison Ivy RAT / `ab.exe`) and `agent.php` to `C:\inetpub\wwwroot\joomla\` via authenticated Joomla admin session. |
 | **Aug 10 — 21:56:18** | Installation | Sysmon EventCode=1: `cmd.exe /c "3791.exe"` executed under `NT AUTHORITY\IUSR`. RAT is live on the server. |
-| **Aug 10 — ~22:13** | C2 | Compromised server (`192.168.250.70`) initiates outbound beacon to `prankglassinebracket.jumpingcrab[.]com:1337`. Server issues `GET /poisonivy-is-coming-for-you-batman.jpeg`. |
+| **Aug 10 — ~22:13** | C2 | Compromised server (`192.168.250.70`) initiates outbound beacon to `prankglassinebracket.jumpingcrab.com:1337`. Server issues `GET /poisonivy-is-coming-for-you-batman.jpeg`. |
 | **Aug 10 — 22:13:46** | Actions on Objectives | Defacement image retrieved from C2 (`23.22.63.114`) and deployed to web root. `imreallynotbatman.com` is defaced. Fortigate detects the outbound request as "Malicious Website" but allows it through (monitor mode). |
 
 ---
@@ -459,7 +504,7 @@ This incident is a **True Positive** and a **confirmed APT intrusion**. The P01s
 
 **Immediate Containment:**
 1. Isolate `192.168.250.70` from the network immediately — the server is actively beaconing to `23.22.63.114`.
-2. Block all traffic to/from `40.80.148.42`, `23.22.63.114`, and `prankglassinebracket.jumpingcrab[.]com` at the perimeter firewall and DNS level.
+2. Block all traffic to/from `40.80.148.42`, `23.22.63.114`, and `prankglassinebracket.jumpingcrab.com` at the perimeter firewall and DNS level.
 3. Remove `3791.exe`, `agent.php`, and the defacement JPEG from `C:\inetpub\wwwroot\joomla\`.
 4. Reset the Joomla `admin` account credentials and revoke all active sessions.
 5. Conduct a full memory dump of `192.168.250.70` before wiping — the RAT may have established additional persistence mechanisms not visible in web logs.
