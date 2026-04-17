@@ -30,7 +30,11 @@ Dans le menu `Firewall > Rules`, onglet `WAN`, deux règles sont visibles :
 - **La règle à supprimer :** La règle `IPv4 *` avec Source `*`, Destination `*`, Port `*`. C'est elle qui jouait le rôle de "tapis rouge" pour l'attaquant.
 - **La règle à conserver :** La règle `NAT Exposition Serveur Web Vulnérable`, qui autorise uniquement le trafic TCP entrant vers `192.168.3.11` sur le port 80. Cette règle est spécifique et justifiée ; elle sera durcie dans une étape ultérieure.
 
+![](../Extras/Phase3/1.png)
+
 Je supprime la règle permissive via l'icône poubelle, puis je clique sur **Apply Changes** pour que le rechargement des règles soit effectif immédiatement.
+
+![](../Extras/Phase3/2.png)
 
 > **Contexte SOC & Blue Team :**
 > Cette suppression illustre le principe fondamental du "Least Privilege" appliqué au réseau : tout ce qui n'est pas explicitement autorisé doit être refusé par défaut (Deny by Default). Un pare-feu périmétrique avec une règle "Allow All" n'est pas un pare-feu, c'est un routeur. La journalisation des tentatives de connexion bloquées sur l'interface WAN constitue une source de renseignement précieuse pour détecter les phases de reconnaissance (MITRE T1595) lors de la Phase 4.
@@ -44,6 +48,8 @@ sudo ip route add 192.168.3.0/24 via 192.168.50.7
 ping -c 4 192.168.3.10
 ```
 
+![](../Extras/Phase3/3.png)
+
 Le résultat est un `100% packet loss`. Même si la table de routage de Kali pointe toujours vers le pfSense, ce dernier reçoit les paquets sur son interface WAN et, ne trouvant aucune règle d'autorisation correspondante, les rejette immédiatement. Le mouvement latéral direct est officiellement brisé.
 
 ### C. Restriction du RDP au niveau LAN (pfSense)
@@ -53,18 +59,22 @@ En Phase 2, une fois dans le LAN, l'attaquant pouvait librement utiliser le prot
 **Règle 1 (Pass) — Autorisation chirurgicale :**
 - Action : `Pass`
 - Protocol : `TCP`
-- Source : `Single host` → `192.168.3.2` (poste client Windows 10 légitime)
-- Destination : `Single host` → `192.168.3.10` (Windows Server 2019)
+- Source : `Address or Alias` → `192.168.3.2` (poste client Windows 10 légitime)
+- Destination : `Address or Alias` → `192.168.3.10` (Windows Server 2019)
 - Port de destination : `MS RDP (3389)`
 - Description : `Autorise RDP uniquement depuis le poste Admin`
+
+![](../Extras/Phase3/19.png)
 
 **Règle 2 (Block) — Blocage du reste :**
 - Action : `Block`
 - Protocol : `TCP`
 - Source : `Any`
-- Destination : `Single host` → `192.168.3.10`
+- Destination : `Address or Alias` → `192.168.3.10`
 - Port de destination : `MS RDP (3389)`
 - Description : `Bloque tout autre accès RDP vers le serveur`
+
+![](../Extras/Phase3/20.png)
 
 L'ordre des règles est critique dans pfSense : les règles sont évaluées de haut en bas et la première correspondance l'emporte. La règle `Pass` spécifique au poste Admin doit impérativement se trouver au-dessus de la règle `Block` générale.
 
@@ -78,6 +88,8 @@ L'ordre des règles est critique dans pfSense : les règles sont évaluées de h
 En Phase 1, j'avais désactivé le pare-feu local de Windows Server 2019 pour simuler une négligence administrative. Cette désactivation avait eu pour conséquence directe de permettre le scan de ports et la connexion RDP depuis n'importe quelle source, même après une hypothétique compromission du pfSense. La défense en profondeur exige qu'une deuxième barrière existe au niveau de l'hôte.
 
 Sur le Windows Server 2019, j'ouvre le "Pare-feu Windows Defender avec fonctions avancées de sécurité", puis `Propriétés du pare-feu Windows Defender`. Pour chacun des trois profils (Domaine, Privé, Public), je passe l'état du pare-feu sur **Activé (recommandé)**, avec les connexions entrantes configurées sur **Bloquer (par défaut)**. Je valide par `Appliquer` puis `OK`.
+
+![](../Extras/Phase3/4.png)
 
 Les trois profils affichent désormais le bouclier vert confirmant leur activation.
 
@@ -100,6 +112,8 @@ La GPO affiche maintenant :
 - Durée de verrouillage : `10 minutes`
 - Réinitialisation du compteur : `10 minutes`
 
+![](../Extras/Phase3/5.png)
+
 Cette mesure neutralise techniquement `crackmapexec` : à la 6ème tentative erronée, le compte `Administrateur` est automatiquement verrouillé par l'OS, rendant la suite de l'attaque par dictionnaire inopérante.
 
 > **Contexte SOC & Blue Team :**
@@ -117,6 +131,8 @@ Toujours dans l'éditeur de la `Default Domain Policy`, je navigue vers :
 
 Je double-clique sur "Auditer le système de fichiers" et je coche **Configurer les événements d'audit suivants**, puis les cases **Succès** et **Échec**. Je valide.
 
+![](../Extras/Phase3/6.png)
+
 **Étape 2 — Application immédiate des stratégies :**
 
 Pour ne pas attendre le prochain cycle de rafraîchissement des GPO (qui peut aller jusqu'à 90 minutes sur un domaine), je force l'application immédiate depuis une invite de commande administrateur :
@@ -127,6 +143,8 @@ gpupdate /force
 
 La sortie confirme : `La mise à jour de la stratégie d'ordinateur s'est terminée sans erreur.`
 
+![](../Extras/Phase3/7.png)
+
 **Étape 3 — Ciblage chirurgical du dossier `PRIVATE` :**
 
 Activer la GPO ne suffit pas : elle autorise Windows à générer des logs de fichiers, mais ne lui indique pas quels répertoires surveiller. Appliquer cet audit à l'ensemble du disque génèrerait un bruit de logs ingérable. Je dois donc cibler précisément le dossier sensible.
@@ -134,6 +152,10 @@ Activer la GPO ne suffit pas : elle autorise Windows à générer des logs de fi
 Dans l'Explorateur Windows, je fais un clic droit sur `C:\PRIVATE - NE PAS RENTRER !` → `Propriétés` → onglet `Sécurité` → `Avancé` → onglet `Audit`. Je clique sur `Ajouter`, puis `Sélectionner un principal` et j'entre `Tout le monde`. Dans la liste des autorisations avancées, je coche :
 - **Écriture** (pour détecter toute modification ou chiffrement de fichier).
 - **Suppression** et **Supprimer les sous-dossiers et les fichiers** (pour détecter l'effacement des originaux après chiffrement).
+
+![](../Extras/Phase3/8.png)
+
+![](../Extras/Phase3/9.png)
 
 Je valide en cliquant `OK` trois fois.
 
@@ -155,6 +177,8 @@ Je double-clique sur "Activer la sécurité basée sur la virtualisation", je ba
 
 L'option "verrouillage UEFI" est la plus robuste : elle empêche la désactivation de Credential Guard sans accès physique à la machine pour modifier les paramètres UEFI, rendant ainsi la désactivation par un attaquant distant impossible même avec les droits `Administrateur`.
 
+![](../Extras/Phase3/22.png)
+
 > **Contexte SOC & Blue Team :**
 > Le Credential Guard ne génère pas directement d'événements dans Splunk, mais il agit comme un filet de sécurité silencieux. Si un attaquant compromet un compte Admin et tente d'exécuter Mimikatz, l'outil retournera des hashs vides ou des erreurs, rendant toute tentative de mouvement latéral par Pass-the-Hash inopérante. En Phase 5 (re-test), cette mesure sera l'une des preuves concrètes de l'efficacité du durcissement.
 
@@ -169,6 +193,8 @@ Je crée le répertoire `C:\BACKUPS_SECURE`, puis j'ouvre ses propriétés (ongl
 2. **Nettoyage des ACL :** Je supprime tous les groupes d'utilisateurs génériques présents dans la liste des permissions.
 
 3. **Configuration finale :** Seuls les comptes `SYSTEM` et `Administrateurs` conservent un accès complet.
+
+![](../Extras/Phase3/annexes9.png)
 
 **Analyse du compromis sécurité/praticité :**
 Un durcissement maximal consisterait à retirer également l'accès `Administrateurs`, ne laissant que `SYSTEM`. Dans ce cas, même un Administrateur humain recevrait un "Accès refusé" depuis l'Explorateur Windows. Pour ce lab, j'ai conservé cet accès pour faciliter les opérations. En production, la méthode professionnelle consiste à utiliser un compte de service dédié (`svc-backup`), le seul autorisé en écriture sur ce dossier, et à recourir à des outils comme `psexec` pour agir en tant que `SYSTEM` de manière traçable si une restauration manuelle est nécessaire.
@@ -193,6 +219,7 @@ sudo mkdir my_certs
 sudo cp /opt/splunk/etc/auth/cacert.pem /opt/splunk/etc/auth/my_certs/
 sudo cp /opt/splunk/etc/auth/server.pem /opt/splunk/etc/auth/my_certs/
 ```
+![](../Extras/Phase3/11.png)
 
 Cette séparation respecte le principe de bonne hygiène opérationnelle : on ne mélange pas les certificats de l'interface d'administration web avec les certificats utilisés pour le transport des données de supervision.
 
@@ -201,6 +228,8 @@ Cette séparation respecte le principe de bonne hygiène opérationnelle : on ne
 Je configure Splunk pour écouter les connexions chiffrées sur un nouveau port dédié (`9998`), en parallèle du port existant (`9997`) que je ne coupe pas immédiatement pour ne pas interrompre le flux de logs pendant la migration.
 
 Via l'interface Web de Splunk (`Settings > Forwarding and receiving > Configure receiving`), je crée un nouveau port de réception `9998`.
+
+![](../Extras/Phase3/10.png)
 
 Ensuite, en ligne de commande, je modifie le fichier `inputs.conf` pour activer le SSL sur ce port :
 
@@ -219,6 +248,8 @@ rootCA = /opt/splunk/etc/auth/my_certs/cacert.pem
 serverCert = /opt/splunk/etc/auth/my_certs/server.pem
 password = password
 ```
+
+![](../Extras/Phase3/13.png)
 
 Je redémarre Splunk pour prendre en compte la configuration :
 
@@ -248,9 +279,6 @@ Depuis le Windows Server 2019, j'utilise WinSCP (protocole SFTP, port 22) pour m
 
 `C:\Program Files\SplunkUniversalForwarder\etc\auth\my_certs\`
 
-**Troubleshooting — Erreur de connexion WinSCP :**
-Lors de la première tentative de connexion, WinSCP retournait une erreur `Network error: Connection to "192.168.3.20" refused`. Le message précisait que le serveur écoutait sur FTP et non SFTP. La cause était simple : le daemon `openssh-server` n'était pas installé sur l'Ubuntu, qui n'offrait donc aucun service SSH actif. L'installation du paquet et le démarrage du service ont immédiatement résolu le problème. Cette erreur illustre un point SOC important : la présence d'un service n'est jamais garantie, même sur une machine qu'on administre — la vérification de l'état des services critiques doit être intégrée aux routines de supervision.
-
 ### E. Configuration du Forwarder Windows pour le Flux Chiffré
 
 Sur le Windows Server 2019, j'ouvre le Bloc-notes en tant qu'Administrateur et je modifie le fichier :
@@ -271,11 +299,15 @@ sslPassword = password
 sslVerifyServerCert = false
 ```
 
+![](../Extras/Phase3/14.png)
+
 Je redémarre le service Forwarder depuis PowerShell (en Admin) :
 
 ```powershell
 Restart-Service SplunkForwarder
 ```
+
+![](../Extras/Phase3/15.png)
 
 ### F. Validation du Tunnel Chiffré
 
@@ -284,6 +316,8 @@ Pour confirmer que les logs arrivent bien via le nouveau canal sécurisé, j'int
 ```spl
 index=main host=WIN-HKVM4FR00PS
 ```
+
+![](../Extras/Phase3/18.png)
 
 Les 11 336 événements s'affichent normalement. Pour l'analyste qui regarde le tableau de bord Splunk, le résultat est visuellement identique. C'est précisément le point clé : le chiffrement est transparent pour l'utilisateur final, mais radical sur le plan de la sécurité du transport.
 
