@@ -27,7 +27,7 @@ The simulation follows the Pyramid of Pain's ascending indicator hierarchy — e
 
 ### 2.1 Sandbox Analysis: sample1.exe
 
-I submitted `sample1.exe` to the Malware Sandbox for dynamic analysis. The report returned the following:
+Sphinx started the Pyramid of Pain testing with a simple sample of malware to start, named `sample1.exe`. I submitted `sample1.exe` to the Malware Sandbox for dynamic analysis. The report returned the following:
 
 **General Info:**
 
@@ -39,6 +39,8 @@ I submitted `sample1.exe` to the Malware Sandbox for dynamic analysis. The repor
 | MD5 | `cbda8ae000aa9cbe7c8b982bae006c2a` |
 | SHA1 | `83d2791ca93e58688598485aa62597c0ebbf7610` |
 | SHA256 | `9c550591a25c6228cb7d74d970d133d75c961ffed2ef7180144859cc09efca8c` |
+
+![](../images/Pyramid-of-pain/2.png)
 
 **Behaviour Analysis:**
 
@@ -60,11 +62,11 @@ I submitted the SHA256 hash to the **Manage Hashes** EDR manager to block the fi
 SHA256: 9c550591a25c6228cb7d74d970d133d75c961ffed2ef7180144859cc09efca8c
 ```
 
+![](../images/Pyramid-of-pain/3.png)
+
 SHA256 was selected over MD5 and SHA1 given its superior collision resistance as the current NIST standard. That said, at this level of the pyramid the choice of hash algorithm is secondary — all three are trivially defeated by a single-byte change to the file.
 
-**Attacker Response:** Sphinx recompiled the malware, generating a new hash with identical functionality. The EDR rule was immediately rendered obsolete.
-
-**MITRE:** N/A at hash level — no tactic mapping applicable.
+**Attacker Response:** Sphinx recompiled the malware making `sample2.exe`, generating a new hash with identical functionality. The EDR rule was immediately rendered obsolete.
 
 ---
 
@@ -97,6 +99,8 @@ SHA256 was selected over MD5 and SHA1 given its superior collision resistance as
 | sample2.exe | 40.97.128.3:443 | — | Microsoft Corporation |
 | sample2.exe | 40.97.128.4:443 | — | Microsoft Corporation |
 
+![](../images/Pyramid-of-pain/5.png)
+
 **Analysis:** The C2 server is confirmed as `154.35.10.113` (ASN: Intrabuzz Hosting Limited). Port 4444 is the classic default Meterpreter C2 port. The two Microsoft Corporation entries are legitimate Windows telemetry — not malicious. The HTTP GET to `/uvLk8YI32` is the initial Meterpreter check-in request.
 
 ### 3.2 Detection Applied
@@ -110,9 +114,11 @@ Destination IP: 154.35.10.113
 Action:         Deny
 ```
 
+![](../images/Pyramid-of-pain/6.png)
+
 The egress rule was the primary control — blocking the outbound connection prevents the Meterpreter session from ever being established. An additional ingress rule blocking inbound from `154.35.10.113` was also applied as a defense-in-depth measure, preventing the C2 server from initiating connections back to the endpoint in the event of any future session establishment.
 
-**Attacker Response:** Sphinx provisioned a new IP address through a cloud provider, rendering the firewall rule ineffective. The domain infrastructure remained unchanged.
+**Attacker Response:** Sphinx upgraded the malware sample to create `sample3.exe`, and provisioned a new IP address through a cloud provider, rendering the firewall rule ineffective. The domain infrastructure remained unchanged.
 
 **MITRE:** Command and Control **(TA0011)**
 
@@ -156,6 +162,8 @@ The egress rule was the primary control — blocking the outbound connection pre
 | services.microsoft.com | 40.97.128.4 |
 | emudyn.bresonicz.info | 62.123.140.9 |
 
+![](../images/Pyramid-of-pain/10.png)
+
 **Analysis:** `sample3.exe` is now functioning as a dropper — it establishes C2 contact and downloads a second-stage payload (`backdoor.exe`) onto the victim machine. The C2 domain is `emudyn.bresonicz.info`, resolving to `62.123.140.9` (ASN: Xplorita Cloud Services). The attacker switched from port 4444 to ports 1337 and 80, but the domain remained constant — that consistency is the exploitable weakness at this level.
 
 `services.microsoft.com` is legitimate Microsoft traffic and was excluded from the investigation.
@@ -171,9 +179,11 @@ Domain Name: emudyn.bresonicz.info
 Action:      Deny
 ```
 
+![](../images/Pyramid-of-pain/12.png)
+
 Denying the domain at the DNS layer blocks resolution regardless of the IP it resolves to — the malware cannot phone home even if Sphinx rotates his server infrastructure behind the same domain.
 
-**Attacker Response:** Sphinx registered a new domain, modifying his DNS records accordingly. He acknowledged this caused him real cost and effort — purchasing and configuring domain infrastructure is significantly more friction than recompiling code or spinning up a new IP.
+**Attacker Response:** Sphinx then made `sample4.exe`, registered a new domain, modifying his DNS records accordingly. He acknowledged this caused him real cost and effort — purchasing and configuring domain infrastructure is significantly more friction than recompiling code or spinning up a new IP.
 
 **MITRE:** Command and Control **(TA0011)** — T1071 (Application Layer Protocol)
 
@@ -217,6 +227,9 @@ Denying the domain at the DNS layer blocks resolution regardless of the IP it re
 | explorer.exe (PID 1938) | Write | `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced` | `EnableBalloonTips` | `1` |
 | notepad.exe (PID 9876) | Read | `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts.txt` | `ProgId` | `txtfile` |
 
+![](../images/Pyramid-of-pain/14.png)
+![](../images/Pyramid-of-pain/15.png)
+
 **Analysis:** The first registry modification is the critical finding — `sample4.exe` is deliberately setting `DisableRealtimeMonitoring = 1` under the Windows Defender Real-Time Protection key, effectively blinding the host's primary defense before proceeding with any further activity. This is MITRE T1562.001 (Impair Defenses: Disable or Modify Tools). The `explorer.exe` and `notepad.exe` registry events are normal Windows behavior and were excluded.
 
 The new C2 domain `cranes0ft.iniware.xyz` confirms Sphinx rotated infrastructure as promised.
@@ -227,7 +240,7 @@ I built a Sigma rule in the **Sigma Rule Builder** targeting the registry modifi
 
 ```
 Log Source:    Sysmon Event Logs
-Event Type:    Registry Modifications (Event ID 4663)
+Event Type:    Registry Modifications (Event ID 13)
 Registry Key:  HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Real-Time Protection
 Registry Name: DisableRealtimeMonitoring
 Value:         1
@@ -236,36 +249,9 @@ ATT&CK ID:     Defense Evasion (TA0005)
 
 **Generated Sigma Rule:**
 
-```yaml
-title: Modification of Windows Defender Real-Time Protection
-id: windows_registry_defender_disable_realtime
-description: |
-  Detects modifications or creations of the Windows Defender Real-Time Protection
-  DisableRealtimeMonitoring registry value.
+![](../images/Pyramid-of-pain/19.png)
 
-references:
-  - https://attack.mitre.org/tactics/TA0005/
-
-tags:
-  - attack.ta0005
-  - sysmon
-
-detection:
-  selection:
-    EventID: 4663
-    ObjectType: Key
-    ObjectName: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Real-Time Protection'
-    NewValue: 'DisableRealtimeMonitoring=1'
-
-  condition: selection
-
-falsepositives:
-  - Legitimate changes to Windows Defender settings.
-
-level: high
-```
-
-Sysmon was selected as the log source because Event ID 4663 captures object access events at the registry key level — precisely what is needed to observe this write operation. The rule targets the specific key and value combination that the malware *must* touch to achieve its defensive evasion objective. No legitimate software modifying this key should be treated as benign without explicit verification.
+Sysmon was selected as the log source because Event ID 13 captures object access events at the registry key level — precisely what is needed to observe this write operation. The rule targets the specific key and value combination that the malware *must* touch to achieve its defensive evasion objective. No legitimate software modifying this key should be treated as benign without explicit verification.
 
 **MITRE:** Defense Evasion **(TA0005)** — T1562.001 (Impair Defenses: Disable or Modify Tools)
 
@@ -279,16 +265,7 @@ With `sample5.exe`, Sphinx confirmed that all control logic now resided on his b
 
 **Excerpt from outgoing_connections.log:**
 
-```
-2023-08-15 09:00:00 | Source: 10.10.15.12 | Destination: 51.102.10.19 | Port: 443 | Size: 97 bytes
-2023-08-15 09:23:45 | Source: 10.10.15.12 | Destination: 43.10.65.115 | Port: 443 | Size: 21541 bytes
-2023-08-15 09:30:00 | Source: 10.10.15.12 | Destination: 51.102.10.19 | Port: 443 | Size: 97 bytes
-2023-08-15 10:00:00 | Source: 10.10.15.12 | Destination: 51.102.10.19 | Port: 443 | Size: 97 bytes
-2023-08-15 10:14:21 | Source: 10.10.15.12 | Destination: 87.32.56.124 | Port: 80  | Size: 1204 bytes
-2023-08-15 10:30:00 | Source: 10.10.15.12 | Destination: 51.102.10.19 | Port: 443 | Size: 97 bytes
-...
-2023-08-15 21:00:00 | Source: 10.10.15.12 | Destination: 51.102.10.19 | Port: 443 | Size: 97 bytes
-```
+![](../images/Pyramid-of-pain/22.png)
 
 **Analysis:** The traffic to `51.102.10.19` exhibits three simultaneous anomalies that together constitute a definitive C2 beaconing signature:
 
@@ -314,35 +291,7 @@ ATT&CK ID:          Command and Control (TA0011)
 
 **Generated Sigma Rule:**
 
-```yaml
-title: Alert on Suspicious Beacon Network Connections
-id: network_connections_criteria_sysmon
-description: |
-  Detects network connections with specific criteria in Sysmon logs:
-  remote IP, remote port, size, and frequency.
-
-references:
-  - https://attack.mitre.org/tactics/TA0011/
-
-tags:
-  - attack.ta0011
-  - sysmon
-
-detection:
-  selection:
-    EventID: 3
-    RemoteIP: '*'
-    RemotePort: '*'
-    Size: 97
-    Frequency: 1800 seconds
-
-  condition: selection
-
-falsepositives:
-  - Legitimate network traffic may match this criteria.
-
-level: high
-```
+![](../images/Pyramid-of-pain/24.png)
 
 Remote IP and Remote Port were deliberately left as `Any`. Hardcoding `51.102.10.19` or port `443` would reduce this rule to IP-level detection — trivially defeated by infrastructure rotation. The true detection value is the behavioral signature: a 97-byte packet transmitted every 1800 seconds. That rhythm is baked into the C2 framework's scheduling logic and cannot be changed without rewriting the tool itself. In a real SIEM deployment, this rule fires on the *pattern* of repeated connections matching these parameters, not on any single connection event.
 
@@ -358,18 +307,7 @@ At this stage, Sphinx acknowledged that the detection cost had exceeded the enga
 
 **commands.log:**
 
-```
-dir c:\ >> %temp%\exfiltr8.log
-dir "c:\Documents and Settings" >> %temp%\exfiltr8.log
-dir "c:\Program Files\" >> %temp%\exfiltr8.log
-dir d:\ >> %temp%\exfiltr8.log
-net localgroup administrator >> %temp%\exfiltr8.log
-ver >> %temp%\exfiltr8.log
-systeminfo >> %temp%\exfiltr8.log
-ipconfig /all >> %temp%\exfiltr8.log
-netstat -ano >> %temp%\exfiltr8.log
-net start >> %temp%\exfiltr8.log
-```
+![](../images/Pyramid-of-pain/26.png)
 
 **Analysis — Reconnaissance command breakdown:**
 
@@ -391,7 +329,7 @@ I built the final Sigma rule in the **Sigma Rule Builder** targeting the file cr
 
 ```
 Log Source:  Sysmon Event Logs
-Event Type:  File Creation and Modification (Event ID 2)
+Event Type:  File Creation and Modification (Event ID 11)
 File Path:   %temp%
 File Name:   exfiltr8.log
 ATT&CK ID:   Collection (TA0009)
@@ -399,38 +337,9 @@ ATT&CK ID:   Collection (TA0009)
 
 **Generated Sigma Rule:**
 
-```yaml
-title: Alert on Potential Exfiltration through File Creation or Modification
-id: sysmon_file_creation_modification_temp
-description: |
-  Detects file creation or modification events with specific criteria:
-  file path and file name.
+![](../images/Pyramid-of-pain/28.png)
 
-references:
-  - https://attack.mitre.org/techniques/TA0010/
-
-tags:
-  - attack.ta0010
-  - attack.exfiltration
-  - attack.file_creation
-  - attack.file_modification
-  - sysmon
-
-detection:
-  selection:
-    - EventID: 2
-      TargetFilename: '*\\exfiltr8.log'
-      TargetPath: '*\\AppData\\Local\\Temp\\*'
-
-  condition: selection
-
-falsepositives:
-  - Legitimate use of file creation and modification in a user's temp folder.
-
-level: high
-```
-
-This rule detects the creation or modification of `exfiltr8.log` anywhere under `%temp%`. Sysmon Event ID 2 (File creation time changed) captures this event at the host level. The detection does not target any specific tool, payload, or network infrastructure — it targets the operator's procedure. Any future engagement by this actor, regardless of tooling, that follows the same collection methodology will trigger this rule.
+This rule detects the creation or modification of `exfiltr8.log` anywhere under `%temp%`. Sysmon Event ID 11 (File creation) captures this event at the host level. The detection does not target any specific tool, payload, or network infrastructure — it targets the operator's procedure. Any future engagement by this actor, regardless of tooling, that follows the same collection methodology will trigger this rule.
 
 **MITRE:** Collection **(TA0009)** — T1119 (Automated Collection), T1074 (Data Staged)
 
