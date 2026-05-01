@@ -197,7 +197,7 @@ Maintenant que les logs pfSense remontent dans Splunk, je peux créer l'alerte d
 ### Configuration dans Splunk
 
 ```spl
-index=main sourcetype="syslog" "192.168.50.5" "block"
+index=main sourcetype="syslog" "block"
 ```
 
 - **Title :** `Intrusion detected on the WAN`
@@ -214,18 +214,17 @@ index=main sourcetype="syslog" "192.168.50.5" "block"
 
 Contrairement aux deux alertes précédentes, le seuil ici est fixé à 0. Un seul paquet bloqué provenant de cette IP suffit à déclencher l'alerte, car dans un réseau correctement segmenté, aucune tentative de connexion depuis le WAN vers des ressources internes ne devrait jamais être considérée comme normale. Chaque occurrence est un signal d'investigation, même isolé.
 
-La configuration finale de l'alerte est confirmée dans Splunk (voir Annexe) : `Enabled: Yes`, `Trigger Condition: Number of Results is > 0`, `Actions: Add to Triggered Alerts`.
+La configuration finale de l'alerte est confirmée dans Splunk : `Enabled: Yes`, `Trigger Condition: Number of Results is > 0`, `Actions: Add to Triggered Alerts`.
 
 > **Contexte SOC & Blue Team :**
 > Cette alerte couvre la phase de reconnaissance (MITRE T1595 — Active Scanning), la toute première étape de la Cyber Kill Chain. En Phase 2, le scan Nmap initial avait généré des dizaines de milliers de requêtes TCP SYN en moins de deux minutes sans qu'aucune alerte ne soit levée. Avec cette configuration, la première requête bloquée depuis une IP non autorisée déclenche une notification dans les 5 minutes. L'analyste SOC est alerté avant même que l'attaquant ait eu le temps de terminer sa phase de cartographie.
 
-## 6. Dashboard "Iron4Software — SOC Supervision"
-Pour tester les trois alertes je génère de bruit:
-- Je simule une attaque brute-force manuelle en me trompant quelques fois sur la session de l'Admin.
-- Je fais des pings et des scans sur l'interface WAN depuis ma machine Kali.
-- Je rentre dans le dossier audité `PRIVATE! NE PAS RENTRER` et je fais exprès de créer des fichiers `.txt`, de les modifier et de les éliminer.
+## 6. Vérification des alertes
+Avant de valider cette phase, je génère de la télémétrie contrôlée pour confirmer que les trois alertes se déclenchent effectivement dans les conditions attendues.
 
-Je confirme que les alertes fonctionnent parfaitement et se déclenchent quand je génère cette télémetrie.
+Pour l'alerte Brute-Force, je simule des tentatives d'authentification échouées en me trompant volontairement plusieurs fois sur le mot de passe du compte Administrateur lors d'une session RDP. Pour l'alerte WAN, je lance des pings et un scan Nmap depuis la machine Kali vers l'interface pfSense. Pour l'alerte Ransomware, je crée, modifie et supprime plusieurs fichiers `.txt` directement dans le dossier `PRIVATE - NE PAS RENTRER !` sur le Windows Server 2019.
+
+Les trois alertes se déclenchent et apparaissent dans le menu Triggered Alerts de Splunk, confirmant que la boucle télémétrie → détection → notification est opérationnelle de bout en bout.
 
 ![](../Extras/Phase4/11.png)
 
@@ -251,7 +250,7 @@ index=main sourcetype="syslog" "192.168.50.5"
 | table Attaquant, "Nombre d'attaques"
 ```
 
-Ce panel affiche un tableau contextualisant la menace : non seulement le volume de tentatives bloquées par pfSense, mais aussi l'attribution explicite de la source (`Kali Linux (192.168.50.5)`). Le format Stats Table est choisi délibérément plutôt qu'un simple chiffre : il montre que l'analyste sait identifier qui attaque, pas seulement que quelqu'un attaque. Le dashboard final affiche 98 tentatives bloquées attribuées à la Kali (voir Annexe).
+Ce panel affiche un tableau contextualisant la menace : non seulement le volume de tentatives bloquées par pfSense, mais aussi l'attribution explicite de la source (`Kali Linux (192.168.50.5)`). Le format Stats Table est choisi délibérément plutôt qu'un simple chiffre : il montre que l'analyste sait identifier qui attaque, pas seulement que quelqu'un attaque. Le dashboard final affiche 98 tentatives bloquées attribuées à la Kali.
 
 ### Panel 2 — Targets Brute-Force Windows (Pie Chart)
 
@@ -271,7 +270,7 @@ OR Accès="Ajout données (ou ajout sous-répertoire ou créer instance de canal
 | stats count
 ```
 
-Ce panel est le heartbeat de l'infrastructure. Il affiche un unique chiffre, vert à 0, rouge dès qu'il dépasse le seuil. En état nominal, le dashboard confirme : `0` en vert, intégrité des fichiers du dossier `PRIVATE` préservée. Lors du test de validation, il est passé à `11` en rouge, confirmant le déclenchement correct de la détection (voir Annexe).
+Ce panel est le heartbeat de l'infrastructure. Il affiche un unique chiffre, vert à 0, rouge dès qu'il dépasse le seuil. En état nominal, le dashboard confirme : `0` en vert, intégrité des fichiers du dossier `PRIVATE` préservée. Lors du test de validation, il est passé à `11` en rouge, confirmant le déclenchement correct de la détection.
 
 Ici je montre l'avant et l'après du dashboard, le premier presque vièrge et le deuxième quand il détecte des anomalies:
 
