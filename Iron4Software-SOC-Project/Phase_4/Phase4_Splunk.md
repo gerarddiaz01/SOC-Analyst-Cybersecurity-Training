@@ -270,9 +270,9 @@ OR Accès="Ajout données (ou ajout sous-répertoire ou créer instance de canal
 | stats count
 ```
 
-Ce panel est le heartbeat de l'infrastructure. Il affiche un unique chiffre, vert à 0, rouge dès qu'il dépasse le seuil. En état nominal, le dashboard confirme : `0` en vert, intégrité des fichiers du dossier `PRIVATE` préservée. Lors du test de validation, il est passé à `11` en rouge, confirmant le déclenchement correct de la détection.
+Ce panel est le heartbeat de l'infrastructure. Il affiche un unique chiffre, vert à 0, rouge dès qu'il dépasse le seuil. En état nominal, le dashboard confirme : `0` en vert, intégrité des fichiers du dossier `PRIVATE` préservée. Lors du test de validation, il est passé à `14` en rouge, confirmant le déclenchement correct de la détection.
 
-Ici je montre l'avant et l'après du dashboard, le premier presque vièrge et le deuxième quand il détecte des anomalies:
+Ici je montre l'avant et l'après du dashboard, le premier est vièrge et le deuxième affiche les anomalies quand il les détecte :
 
 ![](../Extras/Phase4/12.png)
 
