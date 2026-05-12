@@ -173,9 +173,8 @@ sourcetype="ids_logs" src_ip="10.8.0.23" alert="*SMB*"
 | sort _time
 ```
 
-![Phase 3 - SMB lateral movement alerts, page 1]
-
-![Phase 3 - SMB lateral movement alerts, page 2]
+![](../images/NSM/10.png)
+![](../images/NSM/11.png)
 
 32 `ET EXPLOIT Possible MS-SMB Lateral Movement` events are logged on September 5th, targeting `10.0.0.20`, `10.0.0.51`, and `10.0.0.60` on port 445 throughout the day. The confirmation of which hosts were successfully exploited comes from the next phase.
 
@@ -191,7 +190,7 @@ sourcetype="ids_logs" alert="*C2*"
 | sort -count
 ```
 
-![Phase 4 - C2 beacon alerts by source IP]
+![](../images/NSM/12.png)
 
 `10.0.0.60` (WORKSTATION-60) is generating 80 C2 beacon events to `198.51.100.77` on port 4444. This is the confirmation: WORKSTATION-60 was successfully implanted. The SMB exploit from `10.8.0.23` against `10.0.0.60` landed. The chain is confirmed: attacker obtained `10.8.0.23` via brute force, used it to exploit `10.0.0.60` via SMB, implant was dropped, implant phones home to `198.51.100.77:4444`.
 
@@ -204,7 +203,7 @@ sourcetype="ids_logs" alert="*C2*" src_ip="10.0.0.60"
 | stats avg(time_delta) as avg_interval, stdev(time_delta) as stdev_interval by dst_ip
 ```
 
-![Phase 4 - C2 beacon timing analysis]
+![](../images/NSM/13.png)
 
 ```
 avg_interval  = 16496 seconds (~4.5 hours)
@@ -222,7 +221,7 @@ sourcetype="ids_logs" src_ip="10.0.0.60"
 | sort -count
 ```
 
-![Phase 4 - Full alert profile of 10.0.0.60]
+![](../images/NSM/14.png)
 
 The only alert type on `10.0.0.60` is `ET TROJAN Possible C2 Beaconing` with 80 events. There are no HTTP POST Large Upload alerts on this host. The exfiltration activity is not coming from `10.0.0.60`. Given that `10.0.0.51` was also targeted via SMB on September 5th and has not yet been examined for downstream behavior, the investigation pivots to that host.
 
@@ -237,7 +236,8 @@ sourcetype="ids_logs" alert="ET INFO Possible HTTP POST Large Upload"
 | stats count by src_ip
 ```
 
-![Phase 5 - Exfiltration alert by source IP]
+![](../images/NSM/14-5.png)
+![](../images/NSM/14-6.png)
 
 `10.0.0.51` (APP-WEB-01) is the only source generating `ET INFO Possible HTTP POST Large Upload` alerts, with 60 events. The destination is `198.51.100.77`: the same external IP used as the C2 server for `10.0.0.60`. This is not coincidence. Two separate compromised machines, two separate operational roles, same attacker-controlled infrastructure.
 
@@ -251,7 +251,7 @@ sourcetype="ids_logs" src_ip="10.0.0.51" alert="*POST*"
 | sort _time
 ```
 
-![Phase 5 - IDS POST alert timeline for 10.0.0.51]
+![](../images/NSM/19.png)
 
 60 `ET INFO Possible HTTP POST Large Upload` events, beginning September 18th at 23:00 and continuing through September 21st. Traffic consistently directed to `198.51.100.77` on ports 80 and 8080. The off-hours timing (23:00, 03:00, 07:00) is deliberate: bulk data movement scheduled outside business hours reduces the likelihood of real-time detection.
 
@@ -263,7 +263,7 @@ sourcetype="firewall_logs" src_ip="10.0.0.51" dst_ip="198.51.100.77"
 | sort -count
 ```
 
-![Phase 5 - Firewall confirmation of exfiltration connections]
+![](../images/NSM/20.png)
 
 32 connections on port 80 and 28 on port 8080, all reaching the external destination. The exfiltration channel was active and unblocked.
 
@@ -280,7 +280,7 @@ With all attacker-controlled IPs identified, a single unified timeline across al
 | sort _time
 ```
 
-![Full attack timeline - unified query across all sourcetypes]
+![](../images/NSM/21.png)
 
 1,099 events. The three pivot IPs map to the three stages of the attack:
 
