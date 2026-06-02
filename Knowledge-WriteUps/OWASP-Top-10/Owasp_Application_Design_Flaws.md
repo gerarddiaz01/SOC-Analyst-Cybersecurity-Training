@@ -1,6 +1,6 @@
-# Rapport de Lab : OWASP Top 10 2025 — Application Design Flaws
+# Rapport de Lab : OWASP Top 10 2025, Application Design Flaws
 
-**Environnement :** Lab virtuel — Tryhackme Room OWASP Top 10 2025: Application Design Flaws
+**Environnement :** Lab virtuel, Tryhackme Room OWASP Top 10 2025: Application Design Flaws
 
 ## Contexte et Architecture
 Ce laboratoire est réalisé sur la plateforme TryHackMe dans un environnement virtuel contrôlé (Sandbox). L'infrastructure repose sur l'interaction entre deux machines distinctes :

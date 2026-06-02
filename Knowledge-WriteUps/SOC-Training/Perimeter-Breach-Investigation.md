@@ -7,10 +7,10 @@
 
 | Field | Detail |
 |---|---|
-| Platform | TryHackMe — Network Security Essentials Module |
+| Platform | TryHackMe, Network Security Essentials Module |
 | SIEM | Splunk |
 | Log Sources | Firewall logs, IDS/IPS logs, VPN authentication logs |
-| Incident Window | August 25, 2025 — September 28, 2025 |
+| Incident Window | August 25, 2025, September 28, 2025 |
 
 ---
 
@@ -58,7 +58,7 @@ The methodology throughout this investigation is pull-threading: every finding g
 
 ## Lab Content
 
-### Phase 1: Reconnaissance — Surfacing the Scanner
+### Phase 1: Reconnaissance, Surfacing the Scanner
 
 The starting point for any perimeter investigation is blocked traffic. Blocked connections are the footprint of an attacker testing the boundary before they find a way through. Aggregating by source IP immediately separates ambient internet noise from targeted reconnaissance.
 
@@ -86,7 +86,7 @@ The result returns 18 allowed connections, targeting `10.0.0.60`, `10.0.0.50`, `
 
 ---
 
-### Phase 2: Credential Access — VPN Brute Force
+### Phase 2: Credential Access, VPN Brute Force
 
 With an external IP confirmed as both scanning and gaining firewall access, the next thread is authentication. A source IP actively probing the perimeter will also target authentication services. VPN logs are the first place to check.
 
@@ -139,7 +139,7 @@ The first success occurs at 02:19:40 on September 3rd, assigning internal IP `10
 
 ---
 
-### Phase 3: Lateral Movement — Internal Reconnaissance from the VPN IP
+### Phase 3: Lateral Movement, Internal Reconnaissance from the VPN IP
 
 The attacker now holds an internal VPN address. A VPN client initiating connections to internal hosts on administrative ports is not normal employee behavior. The pattern of one IP reaching multiple distinct internal destinations on ports 22, 445, and 3389 within a short window is the lateral movement signature.
 
@@ -180,7 +180,7 @@ sourcetype="ids_logs" src_ip="10.8.0.23" alert="*SMB*"
 
 ---
 
-### Phase 4: C2 Beaconing — Confirming the Implant
+### Phase 4: C2 Beaconing, Confirming the Implant
 
 A successfully implanted host will initiate outbound connections to an attacker-controlled server. This is C2 beaconing: the implant checking in, awaiting instructions. Querying IDS alerts by behavior rather than by a known IP is the correct approach here, because at this stage it is not yet confirmed which of the three targeted hosts was successfully compromised.
 
@@ -227,7 +227,7 @@ The only alert type on `10.0.0.60` is `ET TROJAN Possible C2 Beaconing` with 80 
 
 ---
 
-### Phase 5: Data Exfiltration — Second Compromised Host
+### Phase 5: Data Exfiltration, Second Compromised Host
 
 The absence of exfiltration alerts on `10.0.0.60` combined with the knowledge that `10.0.0.51` was targeted via the same SMB lateral movement session drives the next query. Rather than assuming which host performed the exfiltration, the correct approach is to query by behavior across all sources and let the data surface the answer.
 
@@ -325,6 +325,6 @@ The C2 server and exfiltration endpoint share the same external IP. `198.51.100.
 
 ---
 
-*Investigation conducted on TryHackMe — Network Security Essentials Module*
+*Investigation conducted on TryHackMe, Network Security Essentials Module*
 
 ---

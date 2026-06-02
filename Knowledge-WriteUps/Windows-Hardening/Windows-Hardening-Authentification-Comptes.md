@@ -1,6 +1,6 @@
 # Hardening de l'authentification Windows via GPO.
 
-**Environnement :** Lab virtuel de Windows Hardening sur l'authentification et les comptes — Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
+**Environnement :** Lab virtuel de Windows Hardening sur l'authentification et les comptes, Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
 
 # Objectif du Lab
 L'objectif de ce laboratoire est de durcir les politiques d'authentification et la gestion des comptes sur un système Windows. Par l'application stricte de Stratégies de Groupe (GPO), je vise à bloquer les vecteurs d'attaques courants liés aux identifiants (force brute, énumération, extraction de mots de passe en cache) et à réduire drastiquement la surface d'attaque lors de la connexion.

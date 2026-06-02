@@ -1,6 +1,6 @@
 # Hardening du Microsoft Defender Antivirus via GPO
 
-**Environnement :** Lab virtuel de Windows Hardening sur Microsoft Defender Antivirus — Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
+**Environnement :** Lab virtuel de Windows Hardening sur Microsoft Defender Antivirus, Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
 
 # Objectif du Lab
 L'objectif de ce laboratoire est de configurer et de durcir l'antivirus natif Microsoft Defender sur un système Windows en appliquant les bonnes pratiques de sécurité. Je dois m'assurer que les défenses de l'hôte sont optimisées contre les menaces avancées et les attaques Zero-Day, tout en préservant les artefacts nécessaires à une investigation numérique ultérieure.
