@@ -95,7 +95,7 @@ SourceIP:      192.168.254.107:51830
 DestinationIP: 167.71.199.191:80
 ```
 
-`phishteam.xyz` resolving to `167.71.199.191` is the malicious domain. This is delivery infrastructure, not C2 - the distinction becomes relevant later. To find the payload executed by the document, Timeline Explorer was searched for `Enc` with Event ID `1` active, targeting the encoded PowerShell invocation pattern.
+`phishteam.xyz` resolving to `167.71.199.191` is the malicious domain. This is delivery infrastructure, not C2, the distinction becomes relevant later. To find the payload executed by the document, Timeline Explorer was searched for `Enc` with Event ID `1` active, targeting the encoded PowerShell invocation pattern.
 
 ![Timeline Explorer filtered for Enc showing msdt.exe command with base64 payload in full cell contents](../images/Tempest/3.png)
 
@@ -198,7 +198,7 @@ URI:        /9ab62b5 (clean poll) / /9ab62b5?q=<base64> (command result)
 User-Agent: Nim httpclient/1.6.6
 ```
 
-The C2 beacon loop operates as follows: `first.exe` polls `/9ab62b5` via GET to retrieve the next command. After execution, it sends the result back via the `q` parameter as a base64-encoded string. The `Nim httpclient/1.6.6` user agent is a high-confidence indicator - it is not a browser or a legitimate application and directly identifies the binary as compiled using the Nim programming language.
+The C2 beacon loop operates as follows: `first.exe` polls `/9ab62b5` via GET to retrieve the next command. After execution, it sends the result back via the `q` parameter as a base64-encoded string. The `Nim httpclient/1.6.6` user agent is a high-confidence indicator, it is not a browser or a legitimate application and directly identifies the binary as compiled using the Nim programming language.
 
 
 ## Phase 4 - Internal Reconnaissance
@@ -253,7 +253,7 @@ CommandLine:
 SHA256: 8A99353662CCAE117D2BB22EFD8C43D7169060450BE413AF763E8AD7522D2451
 ```
 
-The hash was submitted to VirusTotal, identifying the binary as **Chisel** - an open source TCP/UDP tunneling tool written in Go. The `R:socks` flag establishes a reverse SOCKS5 proxy back to the attacker's server at `167.71.199.191:8080`, tunneling internal network access through the victim machine.
+The hash was submitted to VirusTotal, identifying the binary as **Chisel**, an open source TCP/UDP tunneling tool written in Go. The `R:socks` flag establishes a reverse SOCKS5 proxy back to the attacker's server at `167.71.199.191:8080`, tunneling internal network access through the victim machine.
 
 ![VirusTotal results for ch.exe SHA256 hash showing detection as hacktool.chisel/hack](../images/Tempest/12.png)
 
@@ -312,7 +312,7 @@ DestinationIP:    167.71.222.162
 DestinationPort:  8080
 ```
 
-`final.exe` beacons to `resolvecyber.xyz` on port `8080` - the same C2 server as `first.exe` but a separate port, establishing a SYSTEM-level C2 channel distinct from the user-level one.
+`final.exe` beacons to `resolvecyber.xyz` on port `8080`, the same C2 server as `first.exe` but a separate port, establishing a SYSTEM-level C2 channel distinct from the user-level one.
 
 
 
@@ -485,9 +485,9 @@ The attacker concluded with three independent persistence layers: the `update.ln
 
 The most operationally relevant aspect of this investigation is the alert queue entry point. The investigation began with a single confirmed fact: a malicious `.doc` file was downloaded via Chrome. That anchor was enough to start the chain. Before opening any tool, reading the alert intelligence and forming a hypothesis about the likely execution path shaped every subsequent query. The first filter in Timeline Explorer was not a broad scan but a targeted lookup for `WinWord.exe` as a parent process. In a real environment with millions of events per day, this approach is the difference between finding the thread in minutes versus hours of aimless browsing.
 
-Cross-source corroboration was the mechanism that elevated findings from suspicious to confirmed. Sysmon Event ID 22 showed `phishteam.xyz` was queried by `WINWORD.EXE` - that proves intent. Sysmon Event ID 3 immediately after shows the connection to `167.71.199.191` was completed - that proves the action occurred. Neither alone is sufficient for escalation quality evidence; together they are unambiguous. The same principle applied throughout: the PCAP confirmed what Sysmon indicated through C2 beaconing traffic, and the Windows Security log confirmed what Sysmon showed through account creation - Event ID 4720 corroborating the `net user /add` commands visible in process logs. Any detection or remediation recommendation in a real incident report requires both layers of evidence.
+Cross-source corroboration was the mechanism that elevated findings from suspicious to confirmed. Sysmon Event ID 22 showed `phishteam.xyz` was queried by `WINWORD.EXE` - that proves intent. Sysmon Event ID 3 immediately after shows the connection to `167.71.199.191` was completed, that proves the action occurred. Neither alone is sufficient for escalation quality evidence; together they are unambiguous. The same principle applied throughout: the PCAP confirmed what Sysmon indicated through C2 beaconing traffic, and the Windows Security log confirmed what Sysmon showed through account creation, Event ID 4720 corroborating the `net user /add` commands visible in process logs. Any detection or remediation recommendation in a real incident report requires both layers of evidence.
 
-Two significant detection gaps were exposed by this incident. First, CVE-2022-30190 was exploited without any macro execution, bypassing macro-based email gateway controls entirely. The detection surface for Follina is `msdt.exe` being spawned by Office processes with `ms-msdt:` URI arguments - a Sysmon rule targeting Event ID 1 with `ParentImage` matching Office executables and `CommandLine` containing `ms-msdt:` would catch this at execution time. Second, the C2 traffic used HTTP over port 80 with base64-encoded content in standard GET parameters, blending with legitimate web traffic. Detection requires user agent analysis: `Nim httpclient/1.6.6` is an immediately actionable IOC that would have identified both `first.exe` and `final.exe` beaconing at the network layer. IR recommendation: isolate `TEMPEST`, revoke `benimaru`'s credentials, remove all three persistence mechanisms (`update.lnk`, `TempestUpdate` and `TempestUpdate2` services, `shion` and `shuna` accounts), block `phishteam.xyz` and `resolvecyber.xyz` at the perimeter, and hunt for the `Nim httpclient/1.6.6` user agent string across all endpoint and network logs.
+Two significant detection gaps were exposed by this incident. First, CVE-2022-30190 was exploited without any macro execution, bypassing macro-based email gateway controls entirely. The detection surface for Follina is `msdt.exe` being spawned by Office processes with `ms-msdt:` URI arguments, a Sysmon rule targeting Event ID 1 with `ParentImage` matching Office executables and `CommandLine` containing `ms-msdt:` would catch this at execution time. Second, the C2 traffic used HTTP over port 80 with base64-encoded content in standard GET parameters, blending with legitimate web traffic. Detection requires user agent analysis: `Nim httpclient/1.6.6` is an immediately actionable IOC that would have identified both `first.exe` and `final.exe` beaconing at the network layer. IR recommendation: isolate `TEMPEST`, revoke `benimaru`'s credentials, remove all three persistence mechanisms (`update.lnk`, `TempestUpdate` and `TempestUpdate2` services, `shion` and `shuna` accounts), block `phishteam.xyz` and `resolvecyber.xyz` at the perimeter, and hunt for the `Nim httpclient/1.6.6` user agent string across all endpoint and network logs.
 
 The highest severity finding is the SYSTEM-level C2 channel established by `final.exe`. By the end of the attack chain the adversary held three independent persistence mechanisms, a backdoor local administrator account, and a beaconing implant running as SYSTEM. The service creation under SYSTEM context means the implant survives reboots and runs before any user session begins. The separation of infrastructure between delivery (`phishteam.xyz`) and command and control (`resolvecyber.xyz`) indicates a deliberate operational security posture, suggesting a threat actor with enough maturity to compartmentalise their infrastructure. The full attack chain from phishing document to SYSTEM access was completed within the same session, indicating either an automated post-exploitation framework or a highly practiced operator working a pre-planned playbook.
 
