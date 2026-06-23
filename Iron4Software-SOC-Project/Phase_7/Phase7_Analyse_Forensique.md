@@ -352,17 +352,6 @@ L'honnêteté forensique impose de distinguer ce qui est prouvé par les logs, c
 
 ## 5. Bilan de l'Investigation Forensique
 
-### Tableau comparatif : Posture Phase 6 vs Phase 7
-
-| Dimension | Phase 6 - Réponse à Incident | Phase 7 - Analyse Forensique |
-|---|---|---|
-| **Posture** | Pompier - stopper l'hémorragie | Médecin légiste - autopsier la blessure |
-| **Temporalité** | Temps réel - urgence opérationnelle | Post-incident - reconstruction à tête reposée |
-| **Objectif logs** | Triage : identifier les systèmes compromis | Reconstruction : prouver chaque étape de l'attaque |
-| **Précision requise** | Suffisante pour agir | Maximale - valeur probatoire |
-| **Traitement des lacunes** | Contournement opérationnel | Documentation et explication |
-| **Livrable** | Fiche Incident + Playbook IR | Rapport forensique + IoC formalisés |
-
 ### Fenêtre d'exposition et enseignements
 
 La donnée la plus marquante de cette investigation n'est pas technique, c'est temporelle. La compromission initiale date du **07 mars 2026**. La première alerte SOC date du **19 avril 2026**. Soit **43 jours** pendant lesquels l'attaquant a eu accès à l'infrastructure sans qu'aucun mécanisme de détection ne déclenche.
