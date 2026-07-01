@@ -2,7 +2,6 @@
 
 ![Status](https://img.shields.io/badge/Status-En_Formation-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Blue_Team_%26_Detection-0052cc?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 Bienvenue dans mon répertoire d'apprentissage dédié à la cybersécurité. Ce dépôt centralise ma progression technique alors que je me prépare à devenir SOC Analyst (objectif : 10-12 mois). Il documente mes projets, mes laboratoires pratiques, mes analyses, et les configurations de mes environnements de laboratoire (Home Labs) et le durcissement de systèmes.
 
