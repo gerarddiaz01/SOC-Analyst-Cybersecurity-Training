@@ -24,7 +24,7 @@ Voici les technologies et outils que j'utilise activement dans ce cursus :
 | :--- | :--- |
 | **SIEM & Logs** | ![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat-square&logo=splunk&logoColor=white) ![Elastic](https://img.shields.io/badge/Elastic_Stack-005571?style=flat-square&logo=elastic&logoColor=white) |
 | **Scripting & Auto** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white) PowerShell |
-| **Infrastructure** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) VirtualBox, Wireshark |
+| **Infrastructure** | VirtualBox, Wireshark |
 
 ## Structure du Répertoire
 
