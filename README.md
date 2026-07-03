@@ -1,47 +1,63 @@
-# Portfolio : Analyste SOC & Cybersécurité
+# SOC Analyst & Cybersecurity Portfolio
 
-![Status](https://img.shields.io/badge/Status-En_Formation-blue?style=flat-square)
 ![Focus](https://img.shields.io/badge/Focus-Blue_Team_%26_Detection-0052cc?style=flat-square)
+![TryHackMe](https://img.shields.io/badge/TryHackMe-Top_2%25-212121?style=flat-square&logo=tryhackme&logoColor=white)
+![Availability](https://img.shields.io/badge/Available-Sept_2026-2ea44f?style=flat-square)
 
-Bienvenue dans mon répertoire d'apprentissage dédié à la cybersécurité. Ce dépôt centralise ma progression technique alors que je me prépare à devenir SOC Analyst (objectif : 10-12 mois). Il documente mes projets, mes laboratoires pratiques, mes analyses, et les configurations de mes environnements de laboratoire (Home Labs) et le durcissement de systèmes.
+This repository documents my hands-on progression toward a SOC Analyst role. It centralizes my investigation writeups, home lab builds, and a full purple team project, all approached from a blue team, defensive standpoint. The focus throughout is on the actual mechanics of detection and investigation: how to read the logs, how to spot the anomaly, how to follow the evidence chain, not just the theory behind it.
 
-Objectifs de ce dépôt:
+I am currently completing a SOC Analyst master's program while practicing continuously on TryHackMe, where I rank in the top 2% globally.
 
-- Documenter l'installation et la configuration de mon Home Lab (VirtualBox).
+**What this repository sets out to prove:**
 
-- Prouver mes compétences techniques via des write-ups détaillés.
+- That I can carry an investigation from an initial alert to a full attack timeline, with IOC extraction and MITRE ATT&CK mapping.
+- That I can build and harden a realistic lab environment from scratch, not just consume prebuilt ones.
+- That I document my reasoning the way a SOC analyst documents a case, so the decisions are reproducible and defensible.
 
-- Créer une base de connaissances (Cheat Sheets) pour les opérations quotidiennes en SOC.
+> **Disclaimer:** All scripts, techniques, and information here are for **educational and defensive purposes only**, within controlled environments.
 
-> ⚠️ **Disclaimer :** Tous les scripts, techniques et informations présentés ici sont destinés à un usage **pédagogique et défensif** uniquement, dans des environnements contrôlés.
+## Skills & Tools
 
-## Compétences & Outils (Tech Stack)
-
-Voici les technologies et outils que j'utilise activement dans ce cursus :
-
-| Domaine | Outils & Langages |
+| Domain | Tools & Technologies |
 | :--- | :--- |
-| **SIEM & Logs** | ![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat-square&logo=splunk&logoColor=white) ![Elastic](https://img.shields.io/badge/Elastic_Stack-005571?style=flat-square&logo=elastic&logoColor=white) |
-| **Scripting & Auto** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white) PowerShell |
-| **Infrastructure** | VirtualBox, Wireshark |
+| **SIEM & Detection** | ![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat-square&logo=splunk&logoColor=white) ![Elastic](https://img.shields.io/badge/Elastic_Stack-005571?style=flat-square&logo=elastic&logoColor=white) Wazuh, Sigma, ElastAlert |
+| **Endpoint Telemetry** | Sysmon, Windows Event Logs, Linux auth logs |
+| **Network Analysis** | ![Wireshark](https://img.shields.io/badge/Wireshark-1679A7?style=flat-square&logo=wireshark&logoColor=white) tcpdump, Nmap, PCAP analysis |
+| **Analysis & Forensics** | CyberChef, Windows hardening, OWASP Top 10, web attack analysis |
+| **Scripting** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white) PowerShell |
+| **Infrastructure** | pfSense, virtualization, home lab design |
 
-## Structure du Répertoire
-
-Ce repository est organisé par domaine de compétence :
+## Repository Structure
 
 ```text
 /
-├── 📁 Projects-Simulations/  # Projets de formation et simulations pratiques (Mise en situation)
-├── 📁 Linux-Basics/          # Administration système, scripting Bash, gestion des droits et logs auth
-├── 📁 Windows-Hardening/     # Stratégies d'audit, Event Viewer et sécurisation d'endpoints
-├── 📁 Networking/            # Analyse de protocoles et de trafic (Netstat, Tcpdump, Wireshark, PCAP)
-├── 📁 Infrastructure-Labs/   # Documentation de l'installation du lab (VirtualBox, ISOs)
-└── 📁 Knowledge-Write-Ups/             # Articles/Cheat-sheets techniques et résolutions de challenges TryHackMe
+├── Infrastructure-Labs/       # Home lab build docs: pfSense, Windows 11, Windows Server
+├── Iron4Software-SOC-Project/ # End-to-end purple team lab (documented separately)
+├── Knowledge-WriteUps/        # Technical knowledge base and TryHackMe writeups, by domain
+│   ├── Linux-Basics/          # Linux investigation and home lab writeups
+│   ├── Networking-Basics/
+│   ├── OWASP-Top-10/
+│   ├── SOC-Training/
+│   ├── Tools/
+│   ├── Web-Hacking/
+│   └── Windows-Hardening/     # Windows investigation and hardening writeups
+├── Networking/                # Traffic and protocol analysis
+│   ├── PCAP-Analysis/         # PCAP investigation writeups
+│   └── Wireshark-Labs/        # Wireshark capture analysis
+│   # plus Nmap and tcpdump lab writeups
+└── Projects-Simulations/      # SOC simulator exercises
+    └── SOC-Simulations/       # Alert triage, classification and reporting
 ```
 
-## Contact & Réseaux
-Je suis ouvert aux opportunités en tant qu'Analyste SOC / Blue Team.
+## Highlighted Work
 
-LinkedIn : [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/gerard-diaz-gibert)
+- **Iron4Software Purple Team Project:** a full attack-and-detect lab built end to end, from infrastructure to SIEM investigation. The most complete demonstration of the workflow I would bring to a SOC.
+- **SOC Simulator: Alert Triage, Classification and Reporting:** a structured triage exercise mirroring the day-to-day of an N1 analyst on the alert queue.
+- **Investigation writeups (Knowledge-WriteUps):** individual cases covering log analysis, network forensics, Windows and Linux telemetry, and web attack patterns, each written up with the reasoning made explicit.
 
-Email : [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge\&logo=gmail\&logoColor=white)](mailto:gerarddiazgibert@gmail.com)
+## Contact
+
+Open to SOC Analyst / Blue Team opportunities.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/gerard-diaz-gibert)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:gerarddiazgibert@gmail.com)
