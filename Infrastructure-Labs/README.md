@@ -1,137 +1,130 @@
-# 🛡️ Home Lab SOC - Infrastructure & Déploiement
+# SOC Home Lab: Infrastructure & Deployment
 
-## 📖 Introduction
+![Environment](https://img.shields.io/badge/Environment-Home_Lab-blue?style=flat-square)
+![Virtualization](https://img.shields.io/badge/Stack-VirtualBox_%2B_pfSense-005571?style=flat-square)
+![Purpose](https://img.shields.io/badge/Purpose-Attack_%26_Detect-success?style=flat-square)
 
-Ce document détaille l'architecture, la configuration et la mise en place de mon laboratoire de cybersécurité (Home Lab). L'objectif de cette infrastructure est de simuler un environnement d'entreprise réaliste (réseau segmenté) pour pratiquer des scénarios d'attaque (Red Team) et de défense/analyse (Blue Team).
+## Overview
 
-L'infrastructure est entièrement virtualisée sous **Oracle VirtualBox**, avec **pfSense** agissant comme pare-feu et routeur central.
+This document details the architecture, configuration, and deployment of my cybersecurity home lab. The goal of this infrastructure is to reproduce a realistic, segmented enterprise network in order to practice both offensive scenarios (Red Team) and defensive analysis (Blue Team).
 
----
+The entire environment is virtualized under **Oracle VirtualBox**, with **pfSense** acting as the central firewall and router.
 
-## 1. Architecture & Topologie Réseau
+## 1. Architecture & Network Topology
 
-Le réseau est isolé de l'hôte physique grâce à une segmentation stricte via un commutateur virtuel (Internal Network). Seul le pare-feu pfSense possède une interface pointée vers l'extérieur (WAN) pour l'accès Internet.
+The lab network is isolated from the physical host through strict segmentation on a virtual internal switch. Only the pfSense firewall holds an interface facing outward (WAN) for internet access.
 
-### 🗺️ Schéma Logique
+### Logical Diagram
 
-![Topologie Réseau du Lab SOC](images/Network-Topology.png)
+![Network Topology of the SOC Lab](images/Network-Topology.png)
 
-### 🌐 Plages d'Adresses IP (CIDR)
+### IP Address Ranges (CIDR)
 
-* **Réseau LAN Lab :** `192.168.50.0/24`
-* **Passerelle (Gateway) :** `192.168.50.1`
-* **Broadcast :** `192.168.50.255`
-* **Serveur DNS :** `192.168.50.1` (Relais DNS configuré sur pfSense)
+- **Lab LAN:** `192.168.50.0/24`
+- **Gateway:** `192.168.50.1`
+- **Broadcast:** `192.168.50.255`
+- **DNS Server:** `192.168.50.1` (DNS resolver configured on pfSense)
 
-## 2. Inventaire des Actifs (Inventory)
+## 2. Asset Inventory
 
-Voici la liste des machines virtuelles déployées dans le laboratoire à ce jour.
+The virtual machines deployed in the lab to date:
 
-| Machine | Rôle | OS | IP (LAN) | Ressources (vCPU/RAM) | Interfaces |
+| Machine | Role | OS | IP (LAN) | Resources (vCPU/RAM) | Interfaces |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **pfSense** | Gateway, Firewall, DHCP, DNS | FreeBSD | `192.168.50.1` | 2 vCPU / 2 GB | **WAN:** Pont (Bridge)<br>**LAN:** Interne (`pfsense_lan`) |
-| **Windows Server** | Contrôleur de Domaine (AD) | Server 2019 | `192.168.50.10` | 4 vCPU / 8 GB | **Eth0:** Interne |
-| **Kali Linux** | Attaquant, Scan, Audit | Kali Rolling (Debian) | `192.168.50.101` | 4 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
-| **Ubuntu Desktop** | Machine Cible, Serveur Web/SSH | Ubuntu 24.04 LTS | `192.168.50.102` | 2 vCPU / 4 GB | **Enp0s3:** Interne (`pfsense_lan`) |
-| **Windows 11** | Machine Cible, Endpoint Utilisateur | Windows 11 Pro | `192.168.50.100` | 4 vCPU / 4 GB | **Eth0:** Interne (`pfsense_lan`) |
+| **pfSense** | Gateway, Firewall, DHCP, DNS | FreeBSD | `192.168.50.1` | 2 vCPU / 2 GB | **WAN:** Bridged<br>**LAN:** Internal (`pfsense_lan`) |
+| **Windows Server** | Domain Controller (AD) | Server 2019 | `192.168.50.10` | 4 vCPU / 8 GB | **Eth0:** Internal |
+| **Kali Linux** | Attacker, scanning, auditing | Kali Rolling (Debian) | `192.168.50.101` | 4 vCPU / 4 GB | **Eth0:** Internal (`pfsense_lan`) |
+| **Ubuntu Desktop** | Target, Web/SSH server | Ubuntu 24.04 LTS | `192.168.50.102` | 2 vCPU / 4 GB | **Enp0s3:** Internal (`pfsense_lan`) |
+| **Windows 11** | Target, user endpoint | Windows 11 Pro | `192.168.50.100` | 4 vCPU / 4 GB | **Eth0:** Internal (`pfsense_lan`) |
 
----
+## 3. Hypervisor Configuration & Technical Documentation
 
-## 3. Détails de Configuration Hyperviseur & Documentation Technique
+To keep this document readable, the detailed configuration of each critical component is documented separately:
 
-Pour éviter de surcharger ce document, les configurations détaillées des composants critiques sont documentées séparément :
+- **[pfSense Configuration (Firewall & Rules)](PfSense-Configuration.md)**
+- **[Windows Server 2019 Configuration (AD & DNS)](Windows-Server-Configuration.md)**
+- **[Windows 11 Configuration (Client & Domain Join)](Windows-11-Configuration.md)**
 
-* 📘 **[Configuration pfSense (Firewall & Règles)](PfSense-Configuration.md)**
-* 🧱 **[Configuration Windows Server 2019 (AD & DNS)](Windows-Server-Configuration.md)**
-* 💻 **[Configuration Windows 11 (Client & Jonction Domaine)](Windows-11-Configuration.md)**
+### Internal Network (`pfsense_lan`)
 
-### 🔌 Réseau Interne ("Internal Network")
+Every machine except the pfSense WAN interface is connected to a VirtualBox internal network named **`pfsense_lan`**.
 
-Toutes les machines (sauf l'interface WAN de pfSense) sont connectées sur un réseau interne VirtualBox nommé **`pfsense_lan`**.
+- **Why:** this guarantees that any malicious traffic generated during testing stays confined to the lab and never leaks onto the real home network.
+- **Security:** the VMs cannot communicate directly with the physical host. All traffic has to pass through pfSense, which mirrors how a real perimeter forces traffic through a controlled chokepoint.
 
-* **Pourquoi ?** Cela garantit que le trafic malveillant généré lors des tests reste confiné dans le laboratoire et ne fuite jamais sur le réseau domestique réel.
-* **Sécurité :** Les VMs ne peuvent pas communiquer directement avec l'hôte physique, elles doivent passer par pfSense.
+### Promiscuous Mode (Kali Linux)
 
-### 🕵️ Mode Promiscuous (Kali Linux)
+On the **Kali Linux** machine, the network interface is set to **"Allow All"** in VirtualBox.
 
-Sur la machine **Kali Linux**, le mode de l'interface réseau a été configuré sur **"Allow All" (Tout autoriser)** dans VirtualBox.
+- **SOC relevance:** this lets the Kali interface capture and analyze all traffic crossing the virtual switch (passive sniffing with Wireshark or tcpdump), not only the traffic addressed to it. That visibility is what makes protocol analysis and network intrusion detection possible, and it is the same principle behind a SPAN port or network tap feeding a sensor in production.
 
-* **Justification SOC :** Cela permet à l'interface réseau de la Kali de capturer et d'analyser tout le trafic passant sur le switch virtuel (sniffing passif avec Wireshark ou TCPdump), et non seulement le trafic qui lui est destiné. C'est essentiel pour l'analyse de protocoles et la détection d'intrusions.
+## 4. Connectivity & Validation Tests
 
----
+A series of tests was run to validate routing, DHCP, and network visibility.
 
-## 4. Validation & Tests de Connectivité
+### Test 1: IP Assignment (DHCP)
 
-Une série de tests a été effectuée pour valider le bon fonctionnement du routage, du DHCP et de la visibilité réseau.
+Confirming pfSense hands out addresses in the `192.168.50.x` range.
 
-### ✅ Test 1 : Attribution IP (DHCP)
+- **Command:** `ip a` (Linux) / `ipconfig` (Windows)
+- **Result:** machines receive correct static or dynamic leases.
 
-Vérification que pfSense attribue bien des IP dans la plage `192.168.50.x`.
+### Test 2: Gateway & Internet Access
 
-* **Commande :** `ip a` (Linux) / `ipconfig` (Windows)
-* **Résultat :** Les machines obtiennent des baux statiques ou dynamiques corrects.
+Confirming outbound connectivity (NAT).
 
-### ✅ Test 2 : Accès Gateway & Internet
+- **Command:** `ping 192.168.50.1` (to gateway), then `ping google.com` (to internet).
+- **Result:** latency under 20 ms, DNS resolution working through pfSense.
 
-Vérification de la connectivité sortante (NAT).
+### Test 3: Inter-VM Visibility (Ping)
 
-* **Commande :** `ping 192.168.50.1` (Vers Gateway) puis `ping google.com` (Vers Internet).
-* **Résultat :** Latence < 20ms, résolution DNS fonctionnelle via pfSense.
+Confirming the attacker can reach the victim.
 
-### ✅ Test 3 : Visibilité Inter-VMs (Ping)
+- **Command (from Kali):** `ping 192.168.50.102` (Ubuntu target).
+- **Result:** ICMP reply received (TTL=64). The internal network is functional.
 
-Vérification que l'attaquant peut "voir" la victime.
+### Test 4: Service Scan (Nmap)
 
-* **Commande (depuis Kali) :** `ping 192.168.50.102` (IP Ubuntu).
-* **Résultat :** Réponse ICMP reçue (TTL=64). Le réseau interne est fonctionnel.
+OS and service detection. By default the Ubuntu target exposed no ports (all closed).
 
-### ✅ Test 4 : Scan de Services (Nmap)
+- **Preliminary action (on Ubuntu):** installed SSH to simulate an open service (`sudo apt install openssh-server`).
+- **Command (on Kali):** `sudo nmap -sV -O 192.168.50.102`
+- **Result:**
+  - **Port 22/TCP: Open** (OpenSSH detected, version identified).
+  - **OS detection:** Linux kernel fingerprinted from packet analysis on the open port.
 
-Test de détection d'OS et de services. Par défaut, la cible Ubuntu n'exposait aucun port ("All ports closed").
+### Test 5: Active Directory Authentication (AD DS)
 
-* **Action préalable (sur Ubuntu) :** Installation du service SSH pour simuler une porte ouverte (`sudo apt install openssh-server`).
-* **Commande (sur Kali) :** `sudo nmap -sV -O 192.168.50.102`
-* **Résultat :**
-  * **Port 22/TCP : Open** (Service OpenSSH détecté et version identifiée).
-  * **Détection OS :** Linux Kernel identifié avec précision grâce à l'analyse des paquets sur le port ouvert.
+Validating the client's domain integration and Kerberos.
 
-### ✅ Test 5 : Authentification Active Directory (AD DS)
+- **Action:** logged into Windows 11 with a user account created on the server that does not exist locally on the client.
+- **Test account:** `IRONCORP\alice`
+- **Result:**
+  - Successful logon.
+  - Default Group Policy (GPO) applied.
+  - `whoami` confirms identity: `ironcorp\alice`.
 
-Ce test valide la bonne intégration du poste client au domaine et le fonctionnement du protocole Kerberos.
+## 5. Lab Objectives
 
-* **Action :** Tentative de connexion sur Windows 11 avec un compte utilisateur créé sur le serveur (n'existant pas localement sur le PC).
-* **Compte test :** `IRONCORP\alice`
-* **Résultat :**
-  * Ouverture de session réussie ("Bienvenue").
-  * Application des stratégies de groupe (GPO) par défaut.
-  * Commande `whoami` confirme l'identité : `ironcorp\alice`.
+This lab was designed around three goals:
 
----
+1. **Attack simulation (Red Team):** run scans, brute force attacks (Hydra), and vulnerability exploitation from Kali Linux, to generate realistic malicious activity.
+2. **Hardening (Blue Team):** apply strict security policies, close unnecessary ports, and build firewall rules on pfSense.
+3. **Analysis & monitoring:** capture logs (Syslog, Windows Events) to understand the traces an attack leaves behind, which is the raw material a SOC analyst works from.
 
-## 5. Objectifs du Lab
+## 6. Roadmap
 
-Ce laboratoire a été conçu pour répondre à trois objectifs pédagogiques :
+- [ ] **Firewall:** build strict pfSense rules to segment traffic (DMZ vs LAN).
+- [x] **Active Directory:** promote the Windows server to Domain Controller to simulate an enterprise environment.
+- [ ] **Monitoring:** deploy **Sysmon** on the Windows endpoints and forward logs to a SIEM (Splunk or ELK Stack).
+- [ ] **IDS/IPS:** enable Snort or Suricata on pfSense for network intrusion detection.
 
-1. **Simulation d'Attaques (Red Team) :** Exécuter des scans, des attaques par force brute (Hydra), et des exploitations de vulnérabilités depuis Kali Linux.
-2. **Hardening (Blue Team) :** Configurer des politiques de sécurité strictes, fermer les ports inutiles et mettre en place des règles de pare-feu sur pfSense.
-3. **Analyse & Monitoring :** À terme, capturer les logs (Syslog, Windows Events) pour comprendre les traces laissées par une attaque.
+## Conclusion
 
----
+This lab now stands as a complete, self-contained security sandbox. It reproduces a segmented enterprise network faithfully enough to exercise the full attack and defense chain:
 
-## 6. Prochaines Étapes
+1. **Reconnaissance & exploitation** from Kali Linux.
+2. **Persistence & lateral movement** toward the Domain Controller (Windows Server).
+3. **Detection & response** through log and network traffic analysis.
 
-* [ ] **Configuration Firewall :** Créer des règles strictes sur pfSense pour segmenter le trafic (DMZ vs LAN).
-* [x] **Active Directory :** Promouvoir la machine Windows en Contrôleur de Domaine pour simuler un environnement d'entreprise.
-* [ ] **Monitoring :** Installer **Sysmon** sur les endpoints Windows et rediriger les logs vers un SIEM (Splunk ou ELK Stack).
-* [ ] **IDS/IPS :** Activer Snort ou Suricata sur pfSense pour la détection d'intrusions réseau.
-
----
-
-## 🏁 Conclusion & Perspectives
-
-Ce laboratoire constitue désormais une infrastructure de sécurité complète et autonome ("Sandbox"). Il reproduit fidèlement un réseau d'entreprise segmenté, permettant de simuler l'intégralité de la chaîne d'attaque (Kill Chain) et de défense :
-1.  **Reconnaissance & Exploitation** depuis Kali Linux.
-2.  **Persistance & Mouvements Latéraux** vers le Contrôleur de Domaine (Windows Server).
-3.  **Détection & Réponse** via l'analyse des logs et du trafic réseau.
-
-L'infrastructure est prête pour l'intégration future d'un SIEM (Splunk/ELK) et le déploiement de sondes EDR.
+The infrastructure is ready for the next stage: SIEM integration (Splunk/ELK) and the deployment of EDR sensors.
