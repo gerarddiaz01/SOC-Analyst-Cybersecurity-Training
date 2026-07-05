@@ -42,8 +42,7 @@ I am currently completing a SOC Analyst master's program while practicing contin
 │   └── Windows-Hardening/     # Windows investigation and hardening writeups
 ├── Networking/                # Traffic and protocol analysis
 │   ├── PCAP-Analysis/         # PCAP investigation writeups
-│   └── Wireshark-Labs/        # Wireshark capture analysis
-│   # plus Nmap and tcpdump lab writeups
+│   └── Wireshark-Labs/        # Wireshark / Nmap / tcpdump capture analysis lab write ups
 └── Projects-Simulations/      # SOC simulator exercises
     └── SOC-Simulations/       # Alert triage, classification and reporting
 ```
