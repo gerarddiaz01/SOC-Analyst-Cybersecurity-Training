@@ -32,7 +32,6 @@ I am currently completing a SOC Analyst master's program while practicing contin
 ```text
 /
 ├── Infrastructure-Labs/       # Home lab build docs: pfSense, Windows 11, Windows Server
-├── Iron4Software-SOC-Project/ # End-to-end purple team lab (documented separately)
 ├── Knowledge-WriteUps/        # Technical knowledge base and TryHackMe writeups, by domain
 │   ├── Linux-Basics/          # Linux investigation and home lab writeups
 │   ├── Networking-Basics/
@@ -51,9 +50,9 @@ I am currently completing a SOC Analyst master's program while practicing contin
 
 ## Highlighted Work
 
-- **Iron4Software Purple Team Project:** a full attack-and-detect lab built end to end, from infrastructure to SIEM investigation. The most complete demonstration of the workflow I would bring to a SOC.
+- **[Iron4Software Purple Team Project](https://github.com/gerarddiaz01/Iron4Software-SOC-Project):** a full attack-and-detect lab built end to end, from infrastructure to SIEM investigation. The most complete demonstration of the workflow I would bring to a SOC.
+- **[SOC Investigation Writeups](Knowledge-WriteUps/SOC-Training):** my collection of full SIEM investigations, alert triage to attack timeline, IOC extraction and MITRE ATT&CK mapping. The closest thing to the day-to-day of the role.
 - **SOC Simulator: Alert Triage, Classification and Reporting:** a structured triage exercise mirroring the day-to-day of an N1 analyst on the alert queue.
-- **Investigation writeups (Knowledge-WriteUps):** individual cases covering log analysis, network forensics, Windows and Linux telemetry, and web attack patterns, each written up with the reasoning made explicit.
 
 ## Contact
 
