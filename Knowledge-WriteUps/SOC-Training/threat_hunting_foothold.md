@@ -2,6 +2,9 @@
 
 **Disclaimer**: This writeup documents a guided threat hunting exercise structured around the MITRE ATT&CK framework, as scoped by the TryHackMe room it is based on. It is not an exhaustive incident investigation. Host coverage varies by tactic (some hosts are checked for one tactic and not another) because that reflects the boundaries the room itself set, not a limitation in the analysis. Where a finding required correlating data across sections the room presents separately, this is called out explicitly as an added observation.
 
+## TL;DR 
+Guided threat hunting exercise across a five-host simulated network, following MITRE ATT&CK from Initial Access through Command and Control. Three independent compromises confirmed: a successful SSH brute force against the bastion host, a Remote Code Execution exploit against the public web application, and two separate phishing-based workstation compromises. Cross-referencing timestamps across the room's own tactic sections surfaced something the room never calls out on its own: the web server exploit and the workstation phishing chain share the same source IP but run roughly two hours apart, pointing to one attacker's infrastructure running two parallel entry attempts rather than a single compromise pivoting outward. Full methodology, queries, and reasoning below.
+
 ## Environment
 
 The emulated network consists of five systems, monitored through the Elastic Stack:
