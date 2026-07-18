@@ -39,8 +39,6 @@ Brute-force activity has a distinct shape in authentication logs: a high volume 
 
 ![Bar chart: Failed 71.3%, Invalid 28.7%, Accepted a small remainder](../images/Threat-Hunting_Foothold/2.png)
 
-![Visualize Library, new Lens table](../images/Threat-Hunting_Foothold/3.png)
-
 With a table built on `source.ip` and `user.name`, I queried failed attempts:
 
 ```
