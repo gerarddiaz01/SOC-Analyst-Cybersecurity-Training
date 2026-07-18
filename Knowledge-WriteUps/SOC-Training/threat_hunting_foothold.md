@@ -27,7 +27,6 @@ Hunt for indicators of initial compromise and post-exploitation activity across 
 - Windows Security Event Log
 - MITRE ATT&CK framework (TA0001, TA0002, TA0003, TA0005, TA0011)
 
----
 
 ## Initial Access (TA0001)
 
@@ -73,13 +72,15 @@ A single source IP, 167.71.198.43 again, generated 6,742 requests that returned 
 
 ![Field panels: url.query and user_agent.original top values](../images/Threat-Hunting_Foothold/8.png)
 
+![Field panels: query and source.ip top values](../images/Threat-Hunting_Foothold/8.1.png)
+
 The user agent confirmed it: gobuster 2.0.1 accounted for 90% of traffic. The `url.query` field also showed something the enumeration alone didn't explain: parameters like `x=id`, `x=whoami`, and `c=admin` appearing on requests to a `/gila` directory. That's not what a directory brute-forcer produces on its own, it's a sign the attacker moved from enumeration to exploitation once `/gila` was found. I isolated the 404s from this IP with the relevant fields as columns:
 
 ```
 host.name: web01 AND network.protocol: http AND destination.port: 80 AND source.ip: 167.71.198.43 AND http.response.status_code: 404
 ```
 
-![Discover table: 404 hits with query, user_agent, url.query columns](../images/Threat-Hunting_Foothold/9.png)
+![Discover table: 404 hits with query, user_agent, url.query columns](../images/Threat-Hunting_Foothold/9.1.png)
 
 Then I switched to the status codes that indicate a request actually landed (200, 301, 302), sorted ascending by time to read the attack chronologically:
 
@@ -141,13 +142,9 @@ host.name: WKSTN-* AND *Update.zip*
 
 The archive contained `update.lnk`, a shortcut file. A `.lnk` file shipped inside a `.zip` attachment is a well-worn malware delivery pattern: shortcuts aren't blocked by most mail filters the way executables are, and Windows will happily run whatever the shortcut points to the moment it's double-clicked. To find what fired next, I used View Surrounding Documents on the `update.lnk` event, filtered to WKSTN-2, with `process.executable` added as a column:
 
-![Discover navigation to View Surrounding Documents](../images/Threat-Hunting_Foothold/17.png)
-
 ![Surrounding documents: PowerShell activity immediately following update.lnk](../images/Threat-Hunting_Foothold/18.png)
 
 PowerShell activity follows the shortcut's execution almost immediately, which is the expected outcome of a malicious LNK, and confirms the second workstation was compromised through phishing independently of clifford.miller's chain.
-
----
 
 ## Execution (TA0002)
 
@@ -170,6 +167,8 @@ host.name: WKSTN-* AND winlog.event_id: 4104
 ```
 
 ![Field breakdown before and after noise filtering, 44,934 down to 489 hits](../images/Threat-Hunting_Foothold/20.png)
+
+![Field breakdown before and after noise filtering, 44,934 down to 489 hits](../images/Threat-Hunting_Foothold/20.1.png)
 
 At 44,934 hits this index is unusable as-is. The majority were repeating `Set-StrictMode` boilerplate that PowerShell itself generates and that carries no investigative value, so I excluded it by filtering the `powershell.file.script_block_text` field down to those three specific noise patterns, dropping the set to 489 hits. Noise reduction like this is only safe once you've confirmed the excluded content really is benign and repetitive, filtering blind risks losing the one event that matters.
 
@@ -217,7 +216,6 @@ host.name: WKSTN-* AND winlog.event_id: (1 OR 3) AND process.parent.pid: 1832
 
 `whoami /priv`, `net users`, two separate `Clear-EventLog -LogName Security` calls, and a Windows Defender signature removal command all followed. This confirms `dev.py` is a Python-based reverse shell, giving the attacker interactive command execution through `cmd.exe`, and it's the same shell responsible for the defense evasion actions covered next. A note on methodology here: correlating by raw PID is only reliable within a tight time window, Windows recycles PIDs once a process exits, so the same number can legitimately belong to two unrelated processes an hour apart. Where the gap is wider, `process.entity_id` (which incorporates the process's start time) is the safer field to pivot on.
 
----
 
 ## Defense Evasion (TA0005)
 
@@ -273,8 +271,6 @@ host.name: WKSTN-* AND winlog.event_id: 8
 
 With `process.executable`, `winlog.event_data.SourceUser`, and `winlog.event_data.TargetImage` as columns, most of the 24 hits are explainable SYSTEM-level activity (DWM injecting into csrss.exe, SYSTEM into svchost.exe), which is normal Windows behavior and not worth chasing further. One entry breaks that pattern: `C:\Users\clifford.miller\Downloads\chrome.exe`, the same masquerading binary flagged during the phishing hunt, injecting a thread into `explorer.exe` under clifford.miller's own user context rather than SYSTEM. explorer.exe is a frequent injection target precisely because it's always running and rarely draws scrutiny, and this is the only entry in the result set tied to a known-malicious binary and a standard user account instead of a system service.
 
----
-
 ## Persistence (TA0003)
 
 ### Scheduled Task Creation
@@ -327,8 +323,6 @@ This method won't catch a binary that touches the registry directly through its 
 ```
 cmd /c "REG ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d \"C:\Windows\Temp\installer.exe\""
 ```
-
----
 
 ## Command and Control (TA0011)
 
@@ -416,8 +410,6 @@ host.name: WKSTN-* AND *cdn.golge.xyz*
 
 `powershell.exe` under both compromised user accounts, and `update.exe` (the file bill.hawkins originally downloaded via phishing) all correlate to this channel, confirming the encrypted HTTP C2 as a second, parallel channel to the DNS and Discord channels already established on WKSTN-1.
 
----
-
 ## Analyst's Note: Cross-Host Timeline Correlation
 
 The room's own structure walks each host through each tactic in isolation, which is the right approach for teaching the individual techniques but obscures one relationship that only becomes visible by comparing actual timestamps across sections rather than reading them tactic by tactic.
@@ -426,7 +418,6 @@ The WKSTN-1 phishing chain begins at 14:25:54, when `microsoft.hta` lands in cli
 
 Read together, this doesn't describe one compromise pivoting into the next. It describes the same attacker infrastructure being used to run two independent entry attempts, a phishing-based workstation compromise and a web application exploit, in parallel rather than in sequence. Nothing in either individual tactic section makes that distinction visible, since each is scoped to a single host and a single technique. It only surfaces once the timestamps are cross-referenced against each other directly.
 
----
 
 ## Implications for a SOC Analyst
 
