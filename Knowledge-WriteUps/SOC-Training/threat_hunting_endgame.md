@@ -2,7 +2,7 @@
 
 ## Disclaimer
 
-This write-up documents three independent, self-contained hunting exercises rather than one unified incident. Each case runs against its own index (`case_collection`, `case_exfiltration`, `case_impact`) with its own scope, and the room's own instructions are explicit that findings outside the tactic under investigation are disregarded. I've kept that same boundary here: each case stands on its own, and the only cross-case link I call out is one the data itself supports (see Analyst's Note), not one I went looking for.
+This write-up documents three independent, self-contained hunting exercises rather than one unified incident. Each case runs against its own index (`case_collection`, `case_exfiltration`, `case_impact`) with its own scope, and the lab's own instructions are explicit that findings outside the tactic under investigation are disregarded. I've kept that same boundary here: each case stands on its own, and the only cross-case link I call out is one the data itself supports (see Analyst's Note), not one I went looking for.
 
 ## TL;DR
 
@@ -27,11 +27,10 @@ Practice the threat hunting process against the final phase of the Cyber Kill Ch
 - PowerShell Script Block Logging
 - Native Windows tools abused by the attacker: `vssadmin`, `bcdedit`, `wget`
 
----
 
 ## Case: Collection (TA0009)
 
-### Hypothesis
+### Scenario
 
 An abused administrative account, or an attacker already holding an admin shell, is running keylogging activity on the host. Keyloggers built around direct Windows API calls (`GetKeyboardState`, `GetAsyncKeyState`, `SetWindowsHookEx`, and similar) leave a recognizable footprint in PowerShell Script Block Logging even when no dedicated malware binary is involved.
 
@@ -47,9 +46,9 @@ I started from a broad pattern match across the known API call names and functio
 
 ![Broad pattern match across case_collection](../images/Threat-Hunting_Endgame/1.png)
 
-Four hits, and all of them concentrated in `Microsoft-Windows-PowerShell/Operational`. That's the first useful signal on its own: Script Block Logging is doing exactly what it's supposed to do here, exposing interpreted PowerShell content that wouldn't show up in a plain process-creation event.
+Four hits, it's  abit tricky to understand what is going on on the blobs, so let's organize it a bit. Narrowing the columns to `winlog.channel`, `winlog.event_data.Path`, and `winlog.event_data.ScriptBlockText` surfaced the actual script content: a function named `Start-KeyLogger`, taking a `$Path` parameter, importing `user32.dll` for the keyboard state calls, running from a script named `chrome_update_api.ps1` under `%LOCALAPPDATA%\Temp`.
 
-Narrowing the columns to `winlog.channel`, `winlog.event_data.Path`, and `winlog.event_data.ScriptBlockText` surfaced the actual script content: a function named `Start-KeyLogger`, taking a `$Path` parameter, importing `user32.dll` for the keyboard state calls, running from a script named `chrome_update_api.ps1` under `%LOCALAPPDATA%\Temp`.
+All four hits are concentrated in `Microsoft-Windows-PowerShell/Operational`. That's the first useful signal on its own: Script Block Logging is doing exactly what it's supposed to do here, exposing interpreted PowerShell content that wouldn't show up in a plain process-creation event.
 
 ![Filtered view showing chrome_update_api.ps1 keylogger script](../images/Threat-Hunting_Endgame/2.png)
 
@@ -83,11 +82,11 @@ The output confirmed there was no redirection of the `cat` command to a file, me
 
 This case is a good example of why file-creation and script-block visibility both matter for the same investigation. Without Script Block Logging enabled, the keylogger function itself would never have surfaced, only a generic `powershell.exe` execution with an unremarkable command line. Sysmon file-creation events (event ID 11) filtered for the same script or database name would have flagged the artifact landing on disk independently, giving a second, corroborating detection path. A production detection here should not rely on the filename `chrome_update_api.ps1`, since that's trivially changed between campaigns. Anchoring instead on the combination of Script Block Logging content matching known keylogging API calls, plus a `.ps1` executing from a user temp directory, survives a rename.
 
----
+
 
 ## Case: Exfiltration (TA0010)
 
-### Hypothesis
+### Scenario
 
 A system-native tool call is being used to transfer data out of the environment, likely over a protocol that isn't typically inspected for content by perimeter defenses. ICMP is a classic choice for this precisely because most firewalls pass echo requests without deep inspection.
 
@@ -135,11 +134,10 @@ There's no download event for `icmp4data.ps1` visible in this case's data the wa
 
 From a detection standpoint, ICMP-based exfiltration is a strong argument for the same principle covered in the general playbook, don't rely on the protocol's normal function to mean the traffic is benign. A useful detection here is behavioral rather than signature-based: `powershell.exe` instantiating `System.Net.NetworkInformation.Ping` directly via reflection is itself unusual enough to alert on, independent of chunk size or destination, since almost no legitimate PowerShell workflow needs to construct that object type by hand. Payload size and request frequency on outbound ICMP are the complementary network-side signal, since legitimate ICMP traffic is short and infrequent by comparison to a chunked file transfer running at fixed intervals.
 
----
 
 ## Case: Impact (TA0040)
 
-### Hypothesis
+### Scenario
 
 A system tool call is being used to disrupt recovery capability, most likely by removing shadow copies and neutralizing boot-time recovery options, a pattern consistent with pre-ransomware or pre-destruction staging (the same technique associated with the Olympic Destroyer campaign).
 
