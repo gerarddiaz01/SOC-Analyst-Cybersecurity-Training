@@ -28,13 +28,15 @@ A phishing email compromised a Finance Director's workstation. A follow-up email
 
 ### Tracing the Phishing Attachment
 
-I started from the scenario itself: Michael downloaded an attachment from a spoofed Abotech Waste Management invoice email on September 15. I set the time window to that date and looked for file creation activity tied to Outlook with a ZIP extension (T1566.001, spearphishing attachment):
+I started from the scenario itself: Michael downloaded an attachment from a spoofed Abotech Waste Management invoice email on September 15. 
+
+![Phishing email rendered view](../images/Threat-Hunting_Payment_Collectors/1.png)
+
+I set the time window to that date and looked for file creation activity tied to Outlook with a ZIP extension (T1566.001, spearphishing attachment):
 
 ```
 winlog.event_id: 11 AND *.zip* AND *outlook*
 ```
-
-![Phishing email rendered view](../images/Threat-Hunting_Payment_Collectors/1.png)
 
 ![ZIP creation query results with Zone.Identifier](../images/Threat-Hunting_Payment_Collectors/2.png)
 
