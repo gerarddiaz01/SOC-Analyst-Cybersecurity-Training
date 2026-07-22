@@ -22,8 +22,6 @@ A phishing email compromised a Finance Director's workstation. A follow-up email
 - Sysmon event logs shipped via Winlogbeat
 - CyberChef (Base64 decoding, unzip recipe)
 
----
-
 ## Investigation
 
 ### Tracing the Phishing Attachment
