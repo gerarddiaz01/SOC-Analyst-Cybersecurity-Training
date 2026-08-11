@@ -1,7 +1,7 @@
 # SOC Analyst & Cybersecurity Portfolio
 
 ![Focus](https://img.shields.io/badge/Focus-Blue_Team_%26_Detection-0052cc?style=flat-square)
-![TryHackMe](https://img.shields.io/badge/TryHackMe-Top_2%25-212121?style=flat-square&logo=tryhackme&logoColor=white)
+![TryHackMe](https://img.shields.io/badge/TryHackMe-Top_1%25-212121?style=flat-square&logo=tryhackme&logoColor=white)
 ![Availability](https://img.shields.io/badge/Available-Sept_2026-2ea44f?style=flat-square)
 
 This repository documents my hands-on progression toward a SOC Analyst role. It centralizes my investigation writeups, home lab builds, and a full purple team project, all approached from a blue team, defensive standpoint. The focus throughout is on the actual mechanics of detection and investigation: how to read the logs, how to spot the anomaly, how to follow the evidence chain, not just the theory behind it.
