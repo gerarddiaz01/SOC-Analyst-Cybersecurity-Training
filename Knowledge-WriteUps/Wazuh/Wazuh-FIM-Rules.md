@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-This is Part 3 of a multi-part series building a local SOC lab from scratch with Wazuh. Part 1 covered deploying the platform, agents, and Sysmon. Part 2 covered generating and reading telemetry, then building a custom dashboard from it. Part 3 covers configuring File Integrity Monitoring on both endpoints, then writing a custom detection rule to catch the Windows Guest account being enabled, including the full debugging cycle required to get an AI-drafted rule actually matching Wazuh's internal syntax. Subsequent parts will build Active Response automation and a closing end-to-end investigation on top of what's covered here.
+This is Part 3 of a multi-part series building a local SOC lab from scratch with Wazuh. Part 1 covered deploying the platform, agents, and Sysmon. Part 2 covered generating and reading telemetry, then building a custom dashboard from it. Part 3 covers configuring File Integrity Monitoring on both endpoints, then writing a custom detection rule to catch the Windows Guest account being enabled, including the full debugging cycle required to get an AI-drafted rule actually matching Wazuh's internal syntax. The next and closing part of this series builds Active Response automation on top of what's covered here.
 
 ## Environment
 

@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-This documents the first phase of a multi-part series building a local SOC lab from scratch with Wazuh. Part 1 covers standing up the Wazuh server, deploying agents to Windows and Linux endpoints, and layering Sysmon on both for process-level telemetry. Subsequent parts will build on this foundation: custom dashboards from the telemetry generated here, File Integrity Monitoring and custom detection rules, Active Response automation, and a closing end-to-end investigation that exercises the full stack.
+This documents the first phase of a multi-part series building a local SOC lab from scratch with Wazuh. Part 1 covers standing up the Wazuh server, deploying agents to Windows and Linux endpoints, and layering Sysmon on both for process-level telemetry. Subsequent parts will build on this foundation: custom dashboards from the telemetry generated here, File Integrity Monitoring and custom detection rules, and Active Response automation.
 
 This is a deployment log, not an investigation. There is no attacker and no alert queue to work through. What it demonstrates is the infrastructure work that has to happen before any of that is possible: getting the right logs into the right place, in the right format, from endpoints that speak two different operating systems.
 
@@ -16,7 +16,7 @@ This is a deployment log, not an investigation. There is no attacker and no aler
 
 ## Lab Objective
 
-Deploy a functioning on-premises SOC lab from zero. That means a working Wazuh manager, indexer, and dashboard on Ubuntu, agents reporting in from both a Windows and a Linux endpoint, Sysmon running on both for process-level visibility, and log archiving enabled so the dashboard holds every event generated, not just the ones that happen to trip a predefined alert rule. This is the platform the rest of the series builds on. Part 2 turns this raw telemetry into dashboards, and the parts after that add detection logic, automated response, and a full investigation exercising the whole stack.
+Deploy a functioning on-premises SOC lab from zero. That means a working Wazuh manager, indexer, and dashboard on Ubuntu, agents reporting in from both a Windows and a Linux endpoint, Sysmon running on both for process-level visibility, and log archiving enabled so the dashboard holds every event generated, not just the ones that happen to trip a predefined alert rule. This is the platform the rest of the series builds on. Part 2 turns this raw telemetry into dashboards, and the parts after that add detection logic and automated response.
 
 ## Tools and Technologies
 
@@ -340,7 +340,7 @@ Sysmon deployment translates "something happened" into "a specific process did a
 
 That Windows config edit is also a reminder that agent configuration is itself a detection surface, in the same way a badly-scoped SPL query is. If the `localfile` block for Sysmon had never been added, nothing downstream would ever have surfaced that telemetry, no matter how good the eventual detection rules were. And the failure mode is silent: the agent still shows as active, the dashboard still returns results for other queries, nothing throws an error. It just looks like there's nothing to find, when the reality is there's nothing being collected. That distinction, no findings versus no visibility, matters just as much in a home lab as it does walking into an unfamiliar SIEM on the job. The first question in either case should be what's actually being ingested, not what the rules are currently alerting on.
 
-This build is the floor the rest of the series stands on. Part 2 turns the raw telemetry generated here into dashboards built around it. From there, FIM and custom detection rules, active response automation, and a closing investigation will all depend on the agents, the archiving, and the Sysmon visibility configured in this part actually being correct. Any gap left here doesn't show up until much later, usually as a hunt that comes up empty for reasons that have nothing to do with the hunt itself.
+This build is the floor the rest of the series stands on. Part 2 turns the raw telemetry generated here into dashboards built around it. From there, FIM and custom detection rules, and active response automation, will all depend on the agents, the archiving, and the Sysmon visibility configured in this part actually being correct. Any gap left here doesn't show up until much later, usually as a hunt that comes up empty for reasons that have nothing to do with the hunt itself.
 
 ---
 

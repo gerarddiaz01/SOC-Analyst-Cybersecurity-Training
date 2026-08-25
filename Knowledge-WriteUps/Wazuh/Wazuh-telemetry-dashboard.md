@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-This is Part 2 of a multi-part series building a local SOC lab from scratch with Wazuh. Part 1 covered deploying the platform, agents, and Sysmon. Part 2 covers generating deliberate telemetry on both endpoints (account manipulation on Windows, SSH activity on Linux), reading the resulting raw events in the Wazuh dashboard to confirm the pipeline built in Part 1 actually works end to end, and turning that telemetry into a three-panel custom dashboard. Subsequent parts will build File Integrity Monitoring and custom detection rules, Active Response automation, and a closing end-to-end investigation on top of what's covered here.
+This is Part 2 of a multi-part series building a local SOC lab from scratch with Wazuh. Part 1 covered deploying the platform, agents, and Sysmon. Part 2 covers generating deliberate telemetry on both endpoints (account manipulation on Windows, SSH activity on Linux), reading the resulting raw events in the Wazuh dashboard to confirm the pipeline built in Part 1 actually works end to end, and turning that telemetry into a three-panel custom dashboard. Subsequent parts will build File Integrity Monitoring and custom detection rules, then Active Response automation, on top of what's covered here.
 
 ## Environment
 
