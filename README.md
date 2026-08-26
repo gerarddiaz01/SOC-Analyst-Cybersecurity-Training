@@ -21,11 +21,11 @@ I am currently completing a SOC Analyst master's program while practicing contin
 | Domain | Tools & Technologies |
 | :--- | :--- |
 | **SIEM & Detection** | ![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat-square&logo=splunk&logoColor=white) ![Elastic](https://img.shields.io/badge/Elastic_Stack-005571?style=flat-square&logo=elastic&logoColor=white) Wazuh, Sigma, ElastAlert |
-| **Endpoint Telemetry** | Sysmon, Windows Event Logs, Linux auth logs |
+| **Endpoint Telemetry** | Sysmon, Windows Event Logs, Linux syslog logs |
 | **Network Analysis** | ![Wireshark](https://img.shields.io/badge/Wireshark-1679A7?style=flat-square&logo=wireshark&logoColor=white) tcpdump, Nmap, PCAP analysis |
-| **Analysis & Forensics** | CyberChef, Windows hardening, OWASP Top 10, web attack analysis |
+| **Analysis & Forensics** | CyberChef, Volatility |
 | **Scripting** | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white) PowerShell |
-| **Infrastructure** | pfSense, virtualization, home lab design |
+| **Infrastructure** | pfSense, virtualization, home lab design, tryhackme labs |
 
 ## Repository Structure
 
