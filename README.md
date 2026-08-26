@@ -6,7 +6,7 @@
 
 This repository documents my hands-on progression toward a SOC Analyst role. It centralizes my investigation writeups, home lab builds, and a full purple team project, all approached from a blue team, defensive standpoint. The focus throughout is on the actual mechanics of detection and investigation: how to read the logs, how to spot the anomaly, how to follow the evidence chain, not just the theory behind it.
 
-I am currently completing a SOC Analyst master's program while practicing continuously on TryHackMe, where I rank in the top 2% globally.
+I am currently completing a SOC Analyst master's program while practicing continuously on TryHackMe, where I rank in the top 1% globally.
 
 **What this repository sets out to prove:**
 
